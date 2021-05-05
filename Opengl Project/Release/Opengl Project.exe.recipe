@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>G:\Opengl Project\Release\Opengl Project.exe</FullPath>
+      <FullPath>g:\Opengl Project\Release\Opengl Project.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

@@ -1,37 +1,69 @@
+#include<iostream>
+#include<string.h>
+
 #include <GLFW/glfw3.h>
 #include<GL/GL.h>
+using namespace std;
+const GLint WIDTH = 800, HEIGHT = 600;
 
-int main(void)
+int main()
 {
-    GLFWwindow* window;
+	if (!glfwInit())
+	{
+		cout << "GLFW initiation failed";
+		glfwTerminate();
+		return -1;
+	}
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+	//Set Up Screen
+	//Opengl version
+	//Prints version
+	cout << glfwGetVersionString();
+	//==========================================================================
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //sets the version to 3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //sets the version to 3.3 combined with above
+	//==========================================================================
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);//throws error for deprecated codes
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);//makes forward compatibility
+	//==========================================================================
+	//creating window
+	GLFWwindow  *mainwindow = glfwCreateWindow(WIDTH, HEIGHT, "My Computer", NULL, NULL);
+	if (!mainwindow)
+	{
+		cout << "GLFW winddow error";
+		glfwTerminate();
+		return -1;
+	}
+	//==========================================================================
+	//Get buffer size information
+	int b_width, b_height;
+	glfwGetFramebufferSize(mainwindow, &b_width, &b_height);
+	//==========================================================================
+	//say glew that what gets drawn is on this window
+	glfwMakeContextCurrent(mainwindow);
+	//==========================================================================
+	//Not understood why is it used?
+	if (!glfwInit())
+	{
+		cout << "GLFW initiation failed";
+		glfwDestroyWindow(mainwindow);
+		glfwTerminate();
+		return -1;
+	}
+	//===========================================================================
+	//setp viewport
+	glViewport(0, 0, b_width, b_height);
+	//===========================================================================
+	//loop untill window closed
+	while (!glfwWindowShouldClose(mainwindow))
+	{
+		//get + handle user input events
+		glfwPollEvents();
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
+		glClearColor(1.0f,0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
-
-    glfwTerminate();
-    return 0;
+		glfwSwapBuffers(mainwindow);
+	}
+	//glfwTerminate();
 }
