@@ -27,19 +27,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib.h" />
-    <ClInclude Include="OpenGl.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OpenGl basic func.cpp" />
-    <ClCompile Include="unmanaged.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertexshader" />
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragmentshader" />
+    <ClInclude Include="Clock.h" />
+    <ClInclude Include="coordinate.h" />
+    <ClInclude Include="Draw.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="sphere.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -47,6 +46,7 @@
     <ProjectGuid>{6114415f-1647-46cd-8f61-3301908b07ab}</ProjectGuid>
     <RootNamespace>OpenglProject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Gh</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -188,11 +188,13 @@
     <Link />
     <Link />
     <Link />
+    <Link />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='All|x64'">
     <ClCompile>
       <PreprocessorDefinitions>GLEW_STATIC;</PreprocessorDefinitions>
     </ClCompile>
+    <Link />
     <Link />
     <Link />
     <Link />
