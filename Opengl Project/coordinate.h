@@ -1,5 +1,6 @@
 #pragma once
 #include<math.h>
+#include"Draw.h"
 #define pi 3.14159
 //+->addition
 // -=>subtraction
@@ -103,9 +104,7 @@ public:
             return (_x * x, _y * y, _z * z);
     }
 
-    void rightshift(){
-        *this = coordinate3f(z, y, x);
-    }
+
 };
 
 class coordinate2f

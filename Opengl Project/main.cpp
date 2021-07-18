@@ -18,14 +18,6 @@ GLfloat rotationY = 0.0f;
 //    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 //}
 
-namespace worldprops
-{
-    static coordinate3f center(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -500);
-    static GLfloat rotationX;
-    static GLfloat rotationY;
-    static GLfloat rotationZ;
-}
-
 void mydraw(model Model)
 {
     float halfScreenWidth = SCREEN_WIDTH / 2;
@@ -33,9 +25,13 @@ void mydraw(model Model)
     Model.Draw();
 }
 
+coordinate3f modelCenter=coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,-500);
 model Model = model(75);
+
 int main(void)
 {
+    Model.translate(modelCenter);
+
     GLFWwindow* window;
     if (!glfwInit())
     {
@@ -58,36 +54,26 @@ int main(void)
     int screenHeight = SCREEN_HEIGHT;
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
-    GLdouble m[4][4] = { 0 };
-    m[3][3] = 1;
-    for (int i = 0; i < 3; i++)
-        m[i][i] = 1;
-    const GLdouble* t = &m[0][0];
 
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     glMatrixMode(GL_PROJECTION);
-    glLoadMatrixd(&m[0][0]); 
     glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    Model.translate(worldprops::center);
     
-    GLfloat halfScreenWidth = SCREEN_WIDTH / 2;
-    GLfloat halfScreenHeight = SCREEN_HEIGHT / 2;
-
     
     int frameCount=0;
     double currentTime,previousTime;
     currentTime = previousTime =0;
-    coordinate3f p(200, 200, 200);
-    p.rotation(20, 1, 0, 0, p).print();
-
+    
     while (!glfwWindowShouldClose(window))
     {
         currentTime = glfwGetTime();
-        cout << 1 / (currentTime - previousTime)<<endl;
+        cout <<"FPS:"<< 1 / (currentTime - previousTime) << endl;
+        worldprops::Rot[0].print();
+        worldprops::Rot[1].print();
+        worldprops::Rot[2].print();
 
         glClearColor(1.0f, 0, 0, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -120,40 +106,51 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         switch (key)
         {
             case GLFW_KEY_UP:
-                x = !x;
-                Model.watch->rotx+=10;
+                worldprops::Scale[0].x += 0.01;
+                worldprops::Scale[1].y += 0.01;
                 break;
             case GLFW_KEY_DOWN:
-                x = !x;
-                alpha *= -1;
-                Model.watch->rotx-= 10;
+                worldprops::Scale[0].x -= 0.01;
+                worldprops::Scale[1].y -= 0.01;
                 break;
             case GLFW_KEY_RIGHT:
                 y = !y;
-                Model.watch->roty+= 10;
                 break;
             case GLFW_KEY_LEFT:
                 y = !y;
                 alpha *= -1;
-                Model.watch->roty-= 10;
                 break;
             case GLFW_KEY_SPACE:
-                z = !z;
-                Model.watch->rotz+= 10;
+                worldprops::camera.z += 10;
                 break;
             case GLFW_KEY_BACKSPACE:
-                z = !z;
+                worldprops::camera.z -= 10;
                 alpha *= -1;
-                Model.watch->rotz -= 10;
                 break;
+            case GLFW_KEY_W:
+                worldprops::camera.y += 10;
+                break;
+            case GLFW_KEY_S:
+                worldprops::camera.y -= 10;
+                break;
+            case GLFW_KEY_A:
+                worldprops::camera.x -= 10;
+                break;
+            case GLFW_KEY_D:
+                worldprops::camera.x += 10;
+                break;
+
         }
-        Model.watch->rotx %= 360;
-        Model.watch->roty %= 360;
-        Model.watch->rotz %= 360;
-        Model.watch->clockCenter = Model.watch->clockCenter.rotation(alpha, x, y, z, Model.baseCenter);
-        for (int i = 0; i < Model.planes.size(); i++)
+        
+        worldprops::Scale[0].x = worldprops::Scale[0].x < 0 ? 0 : worldprops::Scale[0].x;
+        worldprops::Scale[1].y = worldprops::Scale[1].y < 0 ? 0 : worldprops::Scale[1].y;
+        worldprops::Scale[2].z = worldprops::Scale[2].z < 0 ? 0 : worldprops::Scale[2].z;
+        
+        /*for (int i = 0; i < Model.planes.size(); i++)
         {
-            Model.planes[i] = Model.planes[i].rotate(alpha,x,y,z,Model.baseCenter);
-        }
+            Model.planes[i] = Model.planes[i].rotate(alpha, x, y, z,worldprops::camera);
+        }*/
+        
+        worldprops::rotate(alpha, x, y, z);
     }
 }

@@ -40,8 +40,8 @@ class Sphere:public Draw
     {
         vector<vector<coordinate3f>> vertices;
         planes.clear();
-        vector<coordinate3f> vert, temp1(sectorCount, baseCenter), temp2(sectorCount, topCenter);
-        vertices.push_back(temp1);
+        vector<coordinate3f> vert,temp1(sectorCount, baseCenter);
+        
         for (int i = 0; i <= stackCount / n + 1; i++)
         {
             vert.clear();
@@ -55,9 +55,12 @@ class Sphere:public Draw
                     )
                 );
             }
+            
             vertices.push_back(vert);
         }
-        vertices.push_back(temp2);
+        if(hemisphere)
+            vertices.push_back(temp1);
+
         vector<plane> temp;
         for (int i = 0; i < vertices.size() - 1; i++)
         {
@@ -70,8 +73,10 @@ public:
     GLfloat radius,height;
     int stackCount, sectorCount,n;
     coordinate3f baseCenter, topCenter,sphereCenter,color;
-    Sphere(int _radius=0,int _stackCount=1, int _sectorCount=0, coordinate3f _baseCenter=coordinate3f(),bool hemisphere=0,coordinate3f _color=coordinate3f(1,1,1))
+    bool hemisphere;
+    Sphere(int _radius=0,int _stackCount=1, int _sectorCount=0, coordinate3f _baseCenter=coordinate3f(),bool _hemisphere=0,coordinate3f _color=coordinate3f(1,1,1))
     {
+        hemisphere = _hemisphere;
         color = _color;
         radius = _radius;
         stackCount = _stackCount+1;

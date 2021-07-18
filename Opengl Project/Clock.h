@@ -14,7 +14,7 @@ class Clock :public Draw
     {
         planes.clear();
         vector<coordinate3f> circle[2];
-        coordinate3f temp,temp1,temp2;
+        coordinate3f temp1,temp2;
         vector<plane> temp3;
         GLfloat sqRadius = radius*0.05;
         for (GLfloat i = 0; i < 2 * pi; i += 2 * pi / 12)
@@ -28,7 +28,8 @@ class Clock :public Draw
         }
                 
         GLfloat factor = 1.1;
-        for (GLfloat i = 0; i < pi; i += pi / 9)
+        coordinate3f temp;
+        for (GLfloat i = 0; i < pi; i += pi / 20)
         {
             temp = coordinate3f(radius * cos(i), radius * sin(i), 0);
             circle[0].push_back(clockCenter + temp + coordinate3f(0, 0, edge * factor));
@@ -48,7 +49,6 @@ class Clock :public Draw
     }
 
 public:
-    
     coordinate3f clockCenter, *pivot,handCenter;
     GLint rotx, roty, rotz;
     void buildhand()
@@ -82,12 +82,6 @@ public:
         planes2.push_back(plane(handCenter, handCenter + s[1] - s[0], handCenter + s[1], coordinate3f()));
      
         int size = planes2.size();
-        /*for (int i = 0; i < watch->planes2.size(); i++)
-        {
-            planes2[i] = watch->planes2[i].rotate(watch->rotx, 1, 0, 0, watch->clockCenter);
-            planes2[i] = watch->planes2[i].rotate(watch->roty, 0, 1, 0, watch->clockCenter);
-            planes2[i] = watch->planes2[i].rotate(watch->rotz, 0, 0, 1, watch->clockCenter);
-        }*/
         for (int i = 0; i < size; i++)
         {
             planes2[i] = planes2[i].translate(clockCenter);
@@ -96,14 +90,12 @@ public:
             planes2.push_back(planes2[i].rotate(+180, 0, 1, 0,clockCenter));
         }
 
-        cout << rotx << "    " <<roty << "    " << rotz << "    " << endl;
-        /*for (int i = 0; i < planes2.size(); i++)
-        {
-            planes2[i] = planes2[i].rotate(rotx, 1, 0, 0, *pivot);
-            planes2[i] = planes2[i].rotate(roty, 0, 1, 0, *pivot);
-            planes2[i] = planes2[i].rotate(rotz, 0, 0, 1, *pivot);
-        }*/
-        
+        vector<coordinate3f> transform = {
+                                    coordinate3f(1,0,0),
+                                    coordinate3f(0,1,0),
+                                    coordinate3f(0,0,1)
+        };
+
     }
 
     vector<plane> planes2;
