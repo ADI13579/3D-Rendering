@@ -1,6 +1,7 @@
 #pragma once
 #include"Draw.h"
 
+
 class Sphere:public Draw
 {
     vector<coordinate3f> sincos;
@@ -64,7 +65,7 @@ class Sphere:public Draw
         vector<plane> temp;
         for (int i = 0; i < vertices.size() - 1; i++)
         {
-            temp=genPlane(vertices[i], vertices[int(i + 1)],color);
+            temp=genPlane(vertices[i], vertices[int(i + 1)],baseCenter,color);
             planes.insert(planes.end(), temp.begin(), temp.end());
         }
     }

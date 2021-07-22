@@ -10,9 +10,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-//extern "C" {
-//    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-//}
+extern "C" {
+    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+}
 
 //extern "C" {
 //    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
@@ -25,10 +25,10 @@ void mydraw(model Model)
     Model.Draw();
 }
 
-coordinate3f modelCenter=coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,-500);
-model Model = model(75);
+coordinate3f modelCenter=coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/3,-500);
+model Model = model(50);
 
-int main(void)
+int main()
 {
     Model.translate(modelCenter);
 
@@ -63,33 +63,50 @@ int main(void)
     glLoadIdentity();
     
     
+
     int frameCount=0;
     double currentTime,previousTime;
     currentTime = previousTime =0;
+
+
+    Sphere test= Sphere(150, 20, 20, Model.baseCenter, 0);
     
+    cout << "Planes Drawn" << Model.planes.size()<<endl;
+    int yu = 0;
+    
+    plane qqq(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0));
+    plane rrr(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(0, 0, 0));
+    
+    glEnableClientState(GL_VERTEX_ARRAY);
     while (!glfwWindowShouldClose(window))
     {
-        currentTime = glfwGetTime();
-        cout <<"FPS:"<< 1 / (currentTime - previousTime) << endl;
-        worldprops::Rot[0].print();
-        worldprops::Rot[1].print();
-        worldprops::Rot[2].print();
+        glEnable(GL_POINT_SMOOTH);
+        glPointSize(1);
 
+        currentTime = glfwGetTime();
+        cout << "FPS:" << 1 / (currentTime - previousTime)<<endl;
+        
         glClearColor(1.0f, 0, 0, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
 
-        glEnableClientState(GL_VERTEX_ARRAY);
+        
+    /*    qqq.draw();
+        rrr.draw();
+    */
+
         
         Model.Draw();
-        glDisableClientState(GL_VERTEX_ARRAY);
-
+         
         glPopMatrix();
         
         glfwSwapBuffers(window);
         glfwPollEvents();
         previousTime = currentTime;
+        
     }
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisable(GL_POINT_SMOOTH);
     glfwTerminate();
     return 0;
 }
@@ -138,6 +155,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 break;
             case GLFW_KEY_D:
                 worldprops::camera.x += 10;
+                break;
+            case GLFW_KEY_M:
+                Mesh= !Mesh;
                 break;
 
         }

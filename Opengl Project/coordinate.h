@@ -1,5 +1,6 @@
 #pragma once
 #include<math.h>
+#include<iomanip>
 #include"Draw.h"
 #define pi 3.14159
 //+->addition
@@ -12,7 +13,7 @@
 class coordinate3f
 {
 public:
-    float x, y, z;
+    GLfloat x, y, z;
     coordinate3f(float _x = 0, float _y = 0, float _z = 0){
         x = _x; y = _y; z = _z;
     }
@@ -51,7 +52,10 @@ public:
     bool operator == (coordinate3f t){
         return (x == t.x) && (y == t.y) && (z == t.z);
     }
-
+    coordinate3f integer()
+    {
+        return coordinate3f(int(x+0.5), int(y+0.5), int(z+0.5));
+    }
     coordinate3f rotation(GLfloat alpha, bool _x ,bool _y,bool _z,coordinate3f pivot = coordinate3f())
     {
         alpha*=pi / 180;
@@ -110,13 +114,21 @@ public:
 class coordinate2f
 {
 public:
-    float x, y;
+    GLfloat x, y;
     coordinate2f(float _x = 0, float _y = 0)
     {
         x = _x; y = _y;
     }
+    coordinate2f(coordinate3f _t)
+    {
+        x = _t.x;
+        y = _t.y;
+    }
     void print()
     {
         std::cout << x << "    " << y<<std::endl;
+    }
+    bool operator == (coordinate2f t) {
+        return (x == t.x) && (y == t.y);
     }
 };

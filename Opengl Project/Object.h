@@ -60,7 +60,7 @@ class Object :public Draw
         vector<plane> temp;
         for (int i = 0; i < vertices.size() - 1; i++)
         {
-            temp=genPlane(vertices[i], vertices[i + 1],color);
+            temp=genPlane(vertices[i], vertices[i + 1],baseCenter,color);
             planes.insert(planes.end(), temp.begin(), temp.end());
         }
     }

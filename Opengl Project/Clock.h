@@ -23,7 +23,7 @@ class Clock :public Draw
             temp2=clockCenter + temp1 + coordinate3f(0, 0, edge*1.2);
             vector<coordinate3f> p = {temp2 + coordinate3f(-sqRadius,+sqRadius,0), temp2 + coordinate3f(+sqRadius, +sqRadius, 0) };
             vector<coordinate3f> q = {temp2 + coordinate3f(-sqRadius,-sqRadius,0), temp2 + coordinate3f(+sqRadius, -sqRadius, 0) };
-            temp3 = genPlane(p, q,coordinate3f());
+            temp3 = genPlane(p, q,clockCenter,coordinate3f());
             planes.insert(planes.end(), temp3.begin(), temp3.end());
         }
                 
@@ -35,7 +35,7 @@ class Clock :public Draw
             circle[0].push_back(clockCenter + temp + coordinate3f(0, 0, edge * factor));
             circle[1].push_back(clockCenter + coordinate3f(temp.x, -temp.y, temp.z) + coordinate3f(0, 0, edge * factor));
         }
-        vector<plane> p= genPlane(circle[0], circle[1]);
+        vector<plane> p= genPlane(circle[0], circle[1],clockCenter);
         planes.insert(planes.end(), p.begin(), p.end());
         int size = planes.size();
 
@@ -72,14 +72,14 @@ public:
         m[1] = m[0].rotation(-5, 0, 0, 1);
         s[1] = s[0].rotation(-5, 0, 0, 1);
 
-        planes2.push_back(plane(handCenter+ h[0], handCenter + h[1], handCenter,coordinate3f()));
-        planes2.push_back(plane(handCenter, handCenter + h[1] - h[0], handCenter + h[1], coordinate3f()));
+        planes2.push_back(plane(handCenter+ h[0], handCenter + h[1], handCenter, clockCenter, coordinate3f()));
+        planes2.push_back(plane(handCenter, handCenter + h[1] - h[0], handCenter + h[1],clockCenter, coordinate3f()));
 
-        planes2.push_back(plane(handCenter + m[0], handCenter + m[1], handCenter, coordinate3f()));
-        planes2.push_back(plane(handCenter, handCenter + m[1] - m[0], handCenter + m[1], coordinate3f()));
+        planes2.push_back(plane(handCenter + m[0], handCenter + m[1], handCenter, clockCenter, coordinate3f()));
+        planes2.push_back(plane(handCenter, handCenter + m[1] - m[0], handCenter + m[1], clockCenter, coordinate3f()));
 
-        planes2.push_back(plane(handCenter + s[0], handCenter + s[1], handCenter, coordinate3f()));
-        planes2.push_back(plane(handCenter, handCenter + s[1] - s[0], handCenter + s[1], coordinate3f()));
+        planes2.push_back(plane(handCenter + s[0], handCenter + s[1], handCenter, clockCenter, coordinate3f()));
+        planes2.push_back(plane(handCenter, handCenter + s[1] - s[0], handCenter + s[1], clockCenter, coordinate3f()));
      
         int size = planes2.size();
         for (int i = 0; i < size; i++)
@@ -89,6 +89,7 @@ public:
             planes2.push_back(planes2[i].rotate(+90, 0, 1, 0,clockCenter));
             planes2.push_back(planes2[i].rotate(+180, 0, 1, 0,clockCenter));
         }
+
 
         vector<coordinate3f> transform = {
                                     coordinate3f(1,0,0),
