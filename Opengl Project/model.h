@@ -2,12 +2,19 @@
 #include"Object.h"
 #include"Clock.h"
 #include<chrono>
-#include<thread>
+bool IS_THREAD_FINISHED = 0;
 
-void HelloWorld()
+void draw(vector<plane> planes)
 {
-    for (int i = 0; i < INT_MAX; i++)
-        cout << i << endl;
+    
+    for (auto i : planes)
+    {
+        if ((i.normal ^ (worldprops::camera - i.centroid)) < 0)
+        {
+            i.draw();
+        }
+    }
+
 }
 
 void mergeSort(vector<plane>& left, vector<plane>& right, vector<plane>& bars)
@@ -57,7 +64,7 @@ void sort(vector<plane>& bar) {
 }
 
 
-class model:public Draw
+class model
 {
 private:
     void createmodel()
@@ -85,7 +92,6 @@ private:
 
         topCenter = obj4->topCenter;
         modelCenter = baseCenter;
-
     }
 public:
     vector<plane> planes;
@@ -135,34 +141,18 @@ public:
     
     void Draw()
     {
+        IS_THREAD_FINISHED = 0;
         cout << "Planes size" << planes.size() << endl;
         watch->buildhand();
         int count = 0;
-        vector<plane> PlanesDrawn, test;
         
-        for (auto i : planes)
-        {
-            if ((i.normal ^ (worldprops::camera - i.vertex[0])) < 0)
-            {
-                count++;
-                i.draw();
-            }
-        }
+        draw(planes);
+        draw(watch->planes2);
         
-        for (auto i : watch->planes2)
-        {
-            if ((i.normal ^ (worldprops::camera - i.vertex[0])) < 0)
-            {
-                count++;
-                i.draw();
-            }
-        }
         cout << "Planes Drawn After Filtering" << count << endl;
 
         vector<coordinate3f> p = { worldprops::camera };
-        DrawPoint(p, 0, 10);
+        glPointSize(10);
+        putpixel(worldprops::camera,coordinate3f());
     };
-
-    
-    
 };

@@ -35,9 +35,10 @@
   <ItemGroup>
     <ClInclude Include="Clock.h" />
     <ClInclude Include="coordinate.h" />
-    <ClInclude Include="Draw.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Basic.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="sphere.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

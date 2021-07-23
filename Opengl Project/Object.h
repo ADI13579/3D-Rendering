@@ -1,7 +1,7 @@
 #pragma once
-#include"Draw.h"
+#include"Plane.h"
 
-class Object :public Draw
+class Object
 {
     //calculates the radius of the cone at all stack levels
     void initstackradius()

@@ -1,7 +1,7 @@
 #pragma once
+#include<iostream>
 #include<math.h>
-#include<iomanip>
-#include"Draw.h"
+
 #define pi 3.14159
 //+->addition
 // -=>subtraction

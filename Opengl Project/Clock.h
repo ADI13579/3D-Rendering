@@ -1,7 +1,6 @@
 #pragma once
-#include"Draw.h"
-
-class Clock :public Draw
+#include"plane.h"
+class Clock
 {
     GLfloat edge;
     time_t now;
@@ -17,6 +16,7 @@ class Clock :public Draw
         coordinate3f temp1,temp2;
         vector<plane> temp3;
         GLfloat sqRadius = radius*0.05;
+        
         for (GLfloat i = 0; i < 2 * pi; i += 2 * pi / 12)
         {
             temp1 = coordinate3f(radius * 0.9 * cos(i), radius * 0.85 * sin(i));
@@ -29,12 +29,14 @@ class Clock :public Draw
                 
         GLfloat factor = 1.1;
         coordinate3f temp;
+        
         for (GLfloat i = 0; i < pi; i += pi / 20)
         {
             temp = coordinate3f(radius * cos(i), radius * sin(i), 0);
             circle[0].push_back(clockCenter + temp + coordinate3f(0, 0, edge * factor));
             circle[1].push_back(clockCenter + coordinate3f(temp.x, -temp.y, temp.z) + coordinate3f(0, 0, edge * factor));
         }
+
         vector<plane> p= genPlane(circle[0], circle[1],clockCenter);
         planes.insert(planes.end(), p.begin(), p.end());
         int size = planes.size();

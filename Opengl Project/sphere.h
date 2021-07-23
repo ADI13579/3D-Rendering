@@ -1,8 +1,6 @@
 #pragma once
-#include"Draw.h"
-
-
-class Sphere:public Draw
+#include"plane.h"
+class Sphere
 {
     vector<coordinate3f> sincos;
     vector<coordinate2f> sincosz;

@@ -34,13 +34,16 @@
     <ClInclude Include="Clock.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Draw.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="model.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="plane.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,14 +10,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-extern "C" {
+
+/*extern "C" {
     _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
 
-//extern "C" {
-//    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-//}
-
+extern "C" {
+    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+*/
 void mydraw(model Model)
 {
     float halfScreenWidth = SCREEN_WIDTH / 2;
@@ -78,32 +79,27 @@ int main()
     plane rrr(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(0, 0, 0));
     
     glEnableClientState(GL_VERTEX_ARRAY);
-    while (!glfwWindowShouldClose(window))
+
+
+    while(!glfwWindowShouldClose(window))
     {
         glEnable(GL_POINT_SMOOTH);
         glPointSize(1);
 
         currentTime = glfwGetTime();
-        cout << "FPS:" << 1 / (currentTime - previousTime)<<endl;
-        
+        cout << "FPS:" << 1 / (currentTime - previousTime) << endl;
+
         glClearColor(1.0f, 0, 0, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
 
-        
-    /*    qqq.draw();
-        rrr.draw();
-    */
-
-        
-        Model.Draw();
+       Model.Draw();
          
         glPopMatrix();
         
         glfwSwapBuffers(window);
         glfwPollEvents();
         previousTime = currentTime;
-        
     }
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisable(GL_POINT_SMOOTH);
