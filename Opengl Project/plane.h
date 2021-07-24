@@ -1,39 +1,8 @@
 #pragma once
 #include"Basic.h"
 #include<algorithm>
-
-namespace worldprops
-{
-
-    static coordinate3f Rot[3] = {
-                               coordinate3f(1,0,0),
-                               coordinate3f(0,1,0),
-                               coordinate3f(0,0,1),
-    };
-
-    static coordinate3f Scale[3] = {
-                               coordinate3f(1,0,0),
-                               coordinate3f(0,1,0),
-                               coordinate3f(0,0,1),
-    };
-
-    static coordinate3f Ortho[3] = {
-                               coordinate3f(1,0,0),
-                               coordinate3f(0,1,0),
-                               coordinate3f(0,0,0),
-    };
-
-    static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.4, -0);
-
-    void rotate(GLfloat alpha, bool _x, bool _y, bool _z)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            Rot[i] = Rot[i].rotation(alpha, _x, _y, _z);
-        }
-    }
-};
-
+#include<thread>
+bool terminateThread = 0;
 
 class plane
 {
@@ -129,16 +98,12 @@ public:
         return temp;
     }
 
-    int GetIntersectPoint(coordinate2f a, coordinate2f b, int x)
+    int GetIntersectPoint(coordinate2i a, coordinate2i b, int x)
     {
-        if (b.x == a.x)
-            return INT_MAX;
-        else if (a.x > b.x)
-            swap(a, b);
-        if (x<a.x || x>b.x)
+        if (a.x == b.x)
             return INT_MAX;
 
-        float m = (b.y - a.y) / (b.x - a.x);
+        float m = (b.y - a.y) / float((b.x - a.x));
         float c = (a.y - m * a.x);
         int y = m * x + c;
 
@@ -147,60 +112,100 @@ public:
 
     void draw()
     {
-
-        vector<coordinate2f> t = {
-                                    coordinate2f(int(vertex[0].x),int(vertex[0].y)),
-                                    coordinate2f(int(vertex[1].x),int(vertex[1].y)),
-                                    coordinate2f(int(vertex[2].x),int(vertex[2].y)),
+        vector<coordinate2i> t = {
+                                        coordinate2i(vertex[0].x,vertex[0].y),
+                                        coordinate2i(vertex[1].x,vertex[1].y),
+                                        coordinate2i(vertex[2].x,vertex[2].y),
         };
-
         if (t[0] == t[1] || t[1] == t[2] || t[0] == t[2])
             return;
+        if (t[0].x == t[1].x && t[1].x == t[2].x)
+            return;
 
+        if (t[0].y == t[1].y && t[1].y == t[2].y)
+            return;
 
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3 - 1; j++)
                 if (t[j].x > t[j + 1].x)
                     swap(t[j], t[j + 1]);
 
-
-        int min, max;
-        coordinate2f temp;
-        vector<int> point;
-
-        for (int x = t[0].x; x < t[2].x; x++)
+        
+        if (RASTERIZE)
         {
-            temp.x = x;
-            point = vector<int>{
-                                        GetIntersectPoint(t[0], t[1], x),
-                                        GetIntersectPoint(t[1], t[2], x),
-                                        GetIntersectPoint(t[0], t[2], x),
-            };
-
-            std::sort(point.begin(), point.end());
-
-            point.erase(std::unique(point.begin(), point.end()), point.end());
-
-            if (point[point.size() - 1] == INT_MAX)
-                point.pop_back();
-
-            if (point.size() == 0)
-                break;
-            min = point[0];
-            max = point[point.size() - 1];
-
-            for (int y = min; y < max; y++)
+            coordinate2i temp;
+            vector<int> point;
+            for (int x = t[0].x; x <=t[1].x; x++)
             {
-                temp.y = y;
-                putpixel(temp, color);
+                point = {
+                                                GetIntersectPoint(t[0], t[1], x),
+                                                GetIntersectPoint(t[0], t[2], x),
+                };
+                
+                if (point[0] == INT_MAX)
+                    point[0] = t[1].y;
+
+                if (point[0] > point[1])
+                    swap(point[0], point[1]);
+                
+                temp.x = x;
+                for (int y = point[0]; y <=point[1]; y++)
+                {
+                    temp.y = y;
+                    putpixel(temp, color);
+                }
+
+            }
+
+            for (int x = t[1].x; x <=t[2].x; x++)
+            {
+                point = {
+                                            GetIntersectPoint(t[1], t[2], x),
+                                            GetIntersectPoint(t[0], t[2], x),
+                         };
+
+                if (point[0] == INT_MAX)
+                    point[0] = t[1].y;
+
+                if (point[0] > point[1])
+                    swap(point[0], point[1]);
+
+                temp.x = x;
+                for (int y = point[0]; y <=point[1]; y++)
+                {
+                    temp.y = y;
+                    putpixel(temp, color);
+                }
+            }
+
+            if (Mesh)
+            {
+                Bresenham_Line(t[0], t[1], coordinate3f(0, 0, 0));
+                Bresenham_Line(t[0], t[2], coordinate3f(0, 0, 0));
+                Bresenham_Line(t[1], t[2], coordinate3f(0, 0, 0));
             }
         }
-
-        if (Mesh)
+        else
         {
-            Bresenham_Line(vertex[0], vertex[1], coordinate3f(0, 0, 0));
-            Bresenham_Line(vertex[0], vertex[2], coordinate3f(0, 0, 0));
-            Bresenham_Line(vertex[1], vertex[2], coordinate3f(0, 0, 0));
+            glVertexPointer(2, GL_INT, 0, &t[0]);
+            glColor3d(color.x/255, color.y/255, color.z/255);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            if (Mesh)
+            {
+                vector<coordinate2i> m = {
+                                         t[0],
+                                         t[1],
+                                         t[1],
+                                         t[2],
+                                         t[2],
+                                         t[0]
+                };
+
+                glVertexPointer(2, GL_INT, 0, &m[0]);
+                glColor3d(0, 0, 0);
+                glLineWidth(2);
+                glDrawArrays(GL_LINES, 0, 6);
+            }
         }
     }
 
@@ -243,3 +248,34 @@ vector<plane> genPlane(vector<coordinate3f> vertices1, vector<coordinate3f> vert
     }
     return planes;
 };
+
+
+
+void threadprocess(vector<plane> planes)
+{
+    for (auto i : planes)
+        i.draw();
+    terminateThread = 1;
+}
+
+vector<plane> backfacecull(vector<plane> planes)
+{
+    vector<plane> selected;
+    for (auto i : planes)
+    {
+        if ((i.normal ^ (worldprops::camera - i.centroid)) < 0)
+        {
+            selected.push_back(i);
+        }
+    }
+    return selected;
+}
+
+void draw(vector<plane> planes)
+{
+    vector<plane> selected = backfacecull(planes);
+    
+    
+    for (auto i : selected)
+        i.draw();
+}

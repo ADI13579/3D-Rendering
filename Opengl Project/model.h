@@ -2,20 +2,6 @@
 #include"Object.h"
 #include"Clock.h"
 #include<chrono>
-bool IS_THREAD_FINISHED = 0;
-
-void draw(vector<plane> planes)
-{
-    
-    for (auto i : planes)
-    {
-        if ((i.normal ^ (worldprops::camera - i.centroid)) < 0)
-        {
-            i.draw();
-        }
-    }
-
-}
 
 void mergeSort(vector<plane>& left, vector<plane>& right, vector<plane>& bars)
 {
@@ -141,16 +127,13 @@ public:
     
     void Draw()
     {
-        IS_THREAD_FINISHED = 0;
-        cout << "Planes size" << planes.size() << endl;
         watch->buildhand();
         int count = 0;
         
         draw(planes);
         draw(watch->planes2);
         
-        cout << "Planes Drawn After Filtering" << count << endl;
-
+        
         vector<coordinate3f> p = { worldprops::camera };
         glPointSize(10);
         putpixel(worldprops::camera,coordinate3f());

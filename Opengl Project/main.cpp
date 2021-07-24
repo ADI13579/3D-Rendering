@@ -2,7 +2,6 @@
 #include<windows.h>//included for programs to run with dedicated gpu
 #include"sphere.h"
 #include"model.h"
-#include<thread>
 
 static coordinate3f angle;
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -11,10 +10,12 @@ GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
 
-/*extern "C" {
-    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-}
+//extern "C" {
+//    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+//}
 
+
+/*
 extern "C" {
     _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
@@ -33,7 +34,6 @@ int main()
 {
     Model.translate(modelCenter);
 
-    GLFWwindow* window;
     if (!glfwInit())
     {
         return -1;
@@ -46,8 +46,7 @@ int main()
         return -1;
     }
 
-    int hours, mins, seconds;
-
+    
     glfwSetKeyCallback(window, keyCallback);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
@@ -56,30 +55,19 @@ int main()
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
 
+    
+    double currentTime,previousTime;
+    currentTime = previousTime =0;
+
+
+    Object test(300, 300, 300, 1, 4, Model.baseCenter);
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     glMatrixMode(GL_PROJECTION);
     glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1000);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
-    
-
-    int frameCount=0;
-    double currentTime,previousTime;
-    currentTime = previousTime =0;
-
-
-    Sphere test= Sphere(150, 20, 20, Model.baseCenter, 0);
-    
-    cout << "Planes Drawn" << Model.planes.size()<<endl;
-    int yu = 0;
-    
-    plane qqq(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0));
-    plane rrr(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(0, 0, 0));
-    
     glEnableClientState(GL_VERTEX_ARRAY);
-
 
     while(!glfwWindowShouldClose(window))
     {
@@ -93,7 +81,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
 
-       Model.Draw();
+        Model.Draw();
          
         glPopMatrix();
         
@@ -155,17 +143,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             case GLFW_KEY_M:
                 Mesh= !Mesh;
                 break;
-
+            case GLFW_KEY_T:
+                RASTERIZE= !RASTERIZE;
+                break;
         }
         
         worldprops::Scale[0].x = worldprops::Scale[0].x < 0 ? 0 : worldprops::Scale[0].x;
         worldprops::Scale[1].y = worldprops::Scale[1].y < 0 ? 0 : worldprops::Scale[1].y;
         worldprops::Scale[2].z = worldprops::Scale[2].z < 0 ? 0 : worldprops::Scale[2].z;
         
-        /*for (int i = 0; i < Model.planes.size(); i++)
-        {
-            Model.planes[i] = Model.planes[i].rotate(alpha, x, y, z,worldprops::camera);
-        }*/
         
         worldprops::rotate(alpha, x, y, z);
     }

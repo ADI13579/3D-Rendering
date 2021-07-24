@@ -9,6 +9,39 @@ using namespace std;
 #define SCREEN_WIDTH 900
 #define SCREEN_HEIGHT 900
 bool Mesh = 1;
+bool RASTERIZE = 0;
+GLFWwindow* window;
+
+namespace worldprops
+{
+    static coordinate3f Rot[3] = {
+                               coordinate3f(1,0,0),
+                               coordinate3f(0,1,0),
+                               coordinate3f(0,0,1),
+    };
+
+    static coordinate3f Scale[3] = {
+                               coordinate3f(1,0,0),
+                               coordinate3f(0,1,0),
+                               coordinate3f(0,0,1),
+    };
+
+    static coordinate3f Ortho[3] = {
+                               coordinate3f(1,0,0),
+                               coordinate3f(0,1,0),
+                               coordinate3f(0,0,0),
+    };
+
+    static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.4, -0);
+
+    void rotate(GLfloat alpha, bool _x, bool _y, bool _z)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            Rot[i] = Rot[i].rotation(alpha, _x, _y, _z);
+        }
+    }
+};
 
 
 void DrawPoint(vector<coordinate3f> vertices, coordinate3f color, int pointsize = 2)
@@ -23,10 +56,10 @@ void DrawPoint(vector<coordinate3f> vertices, coordinate3f color, int pointsize 
     glDisable(GL_POINT_SMOOTH);
 }
 
-void putpixel(coordinate2f pixel, coordinate3f color)
+void putpixel(coordinate2i pixel, coordinate3f color)
 {
     glColor3f(color.x / 255, color.y / 255, color.z / 255);
-    glVertexPointer(2, GL_FLOAT, 0, &pixel.x);
+    glVertexPointer(2, GL_INT, 0, &pixel.x);
     glDrawArrays(GL_POINTS, 0, 1);
 }
 
@@ -37,10 +70,9 @@ void putpixel(coordinate3f pixel, coordinate3f color)
     glDrawArrays(GL_POINTS, 0, 1);
 }
 
-void Bresenham_Line(coordinate2f a, coordinate2f b, coordinate3f color)
+void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
 {
-    vector<coordinate2f> meshpoint = {};
-    coordinate2f temp;
+    coordinate2i temp;
     int x1 = a.x, x2 = b.x;
     int y1 = a.y, y2 = b.y;
     //calculate slope and exchange x and y if the m>1

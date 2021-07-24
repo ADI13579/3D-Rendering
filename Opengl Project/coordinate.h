@@ -124,11 +124,37 @@ public:
         x = _t.x;
         y = _t.y;
     }
+
+    
     void print()
     {
         std::cout << x << "    " << y<<std::endl;
     }
     bool operator == (coordinate2f t) {
+        return (x == t.x) && (y == t.y);
+    }
+};
+
+class coordinate2i
+{
+public:
+    GLint x, y;
+    coordinate2i(int _x = 0, int _y = 0)
+    {
+        x = _x; y = _y;
+    }
+    coordinate2i(coordinate2f _t)
+    {
+        x = _t.x+0.5;
+        y = _t.y+0.5;
+    }
+
+    void print()
+    {
+        std::cout << x << "    " << y<<std::endl;
+    }
+
+    bool operator == (coordinate2i t) {
         return (x == t.x) && (y == t.y);
     }
 };
