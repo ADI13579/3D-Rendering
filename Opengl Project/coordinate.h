@@ -36,7 +36,7 @@ public:
         return coordinate3f(b2 * c3 - b3 * c2, b3 * c1 - b1 * c3, b1 * c2 - b2 * c1);
     }
     GLfloat operator ~ (){
-        return sqrt(x * x + y * y + x * x);
+        return sqrt(x * x + y * y + z * z);
     }
     coordinate3f operator / (GLfloat t) {
         return coordinate3f(x / t, y / t, z / t);
@@ -45,8 +45,9 @@ public:
     coordinate3f operator ! (){
         
         if (~*this == 0)
-            return coordinate3f();
-        return *this / ~*this;
+            return *this;
+
+        return *this / ~(*this);
     }
 
     bool operator == (coordinate3f t){

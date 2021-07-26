@@ -10,16 +10,17 @@ GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
 
+extern "C" {
+    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+}
+
+
+
 //extern "C" {
-//    _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+//    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 //}
 
 
-/*
-extern "C" {
-    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
-*/
 void mydraw(model Model)
 {
     float halfScreenWidth = SCREEN_WIDTH / 2;
@@ -54,13 +55,25 @@ int main()
     int screenHeight = SCREEN_HEIGHT;
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
-
     
     double currentTime,previousTime;
     currentTime = previousTime =0;
 
 
-    Object test(300, 300, 300, 1, 4, Model.baseCenter);
+    //Object test(SCREEN_WIDTH/sqrt(2), SCREEN_WIDTH/sqrt(2), SCREEN_WIDTH/sqrt(2), 10, 10, coordinate3f(SCREEN_WIDTH/2,0,-1000), coordinate3f(196, 135, 142));
+   /* plane test1(coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,0), coordinate3f(0, 0, 0), coordinate3f(0, SCREEN_HEIGHT/2, 0));
+    plane test2(coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,0), coordinate3f(0, SCREEN_HEIGHT / 2, 0), coordinate3f(0,SCREEN_HEIGHT,0));
+    
+    plane test3(coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,0), coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(0,0,0));
+   */
+
+    plane test1(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0));
+    plane test2(coordinate3f(0, 0, 0), coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0), coordinate3f(SCREEN_WIDTH, 0, 0));
+    plane test3(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0));
+    plane test4(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0), coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(0, 0, 0));
+
+    // plane test2(coordinate3f(SCREEN_WIDTH,SCREEN_HEIGHT,0), coordinate3f(SCREEN_WIDTH, 0, 0), coordinate3f(0, SCREEN_HEIGHT, 0));
+    
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     glMatrixMode(GL_PROJECTION);
@@ -69,6 +82,8 @@ int main()
     glLoadIdentity();
     glEnableClientState(GL_VERTEX_ARRAY);
 
+
+    Sphere test(505, 150, 150, coordinate3f(SCREEN_WIDTH / 2, 0, -500), 0, coordinate3f(191, 86, 119));
     while(!glfwWindowShouldClose(window))
     {
         glEnable(GL_POINT_SMOOTH);
@@ -80,9 +95,15 @@ int main()
         glClearColor(1.0f, 0, 0, 0.5f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
+    
+        //test1.draw();
+        //test2.draw();
+        //test3.draw();
+        //test4.draw();
 
-        Model.Draw();
+        //Model.Draw();
          
+        draw(test.planes);
         glPopMatrix();
         
         glfwSwapBuffers(window);
@@ -151,7 +172,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         worldprops::Scale[0].x = worldprops::Scale[0].x < 0 ? 0 : worldprops::Scale[0].x;
         worldprops::Scale[1].y = worldprops::Scale[1].y < 0 ? 0 : worldprops::Scale[1].y;
         worldprops::Scale[2].z = worldprops::Scale[2].z < 0 ? 0 : worldprops::Scale[2].z;
-        
         
         worldprops::rotate(alpha, x, y, z);
     }

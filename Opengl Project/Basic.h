@@ -6,8 +6,8 @@
 using namespace std;
 
 #define pi 3.14159
-#define SCREEN_WIDTH 900
-#define SCREEN_HEIGHT 900
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1000
 bool Mesh = 1;
 bool RASTERIZE = 0;
 GLFWwindow* window;

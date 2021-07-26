@@ -66,10 +66,10 @@ private:
         obj1[5] =new Object(obj1[4]->topRadius, obj1[4]->topRadius, obj1[1]->height, obj1[1]->stackCount, obj1[1]->sectorCount, obj1[4]->topCenter);
         obj1[6] =new Object(obj1[1]->topRadius, obj1[1]->baseRadius, obj1[1]->height * 14, obj1[1]->stackCount, 4, obj1[5]->topCenter);
         
-//        obj2 = new Sphere(obj1[6]->topRadius, 8, 8, obj1[6]->topCenter, 1);
-        obj2 = new Sphere(150, 30, 30, baseCenter, 0,coordinate3f(191,86,119));
-        
+       obj2 = new Sphere(obj1[6]->topRadius, 8, 8, obj1[6]->topCenter, 1);
+       
         obj3 = new Object(obj2->radius * 0.2, 0, obj2->radius, 1, obj2->sectorCount, coordinate3f(obj2->topCenter.x, obj2->topCenter.y * 0.998, obj2->topCenter.z));
+        
         obj4 = new Sphere(obj3->baseRadius, 3, obj2->sectorCount, coordinate3f(obj3->topCenter.x, obj3->topCenter.y - obj3->height * 0.6, obj3->topCenter.z), 0);
     
 
@@ -104,7 +104,6 @@ public:
         planes.insert(planes.end(), obj3->planes.begin(), obj3->planes.end());
         planes.insert(planes.end(), obj4->planes.begin(), obj4->planes.end());
         planes.insert(planes.end(), watch->planes.begin(), watch->planes.end());
-        planes.clear();
         planes.insert(planes.end(), obj2->planes.begin(), obj2->planes.end());
 
         sort(planes);
