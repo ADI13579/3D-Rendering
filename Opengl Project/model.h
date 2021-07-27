@@ -3,51 +3,7 @@
 #include"Clock.h"
 #include<chrono>
 
-void mergeSort(vector<plane>& left, vector<plane>& right, vector<plane>& bars)
-{
-    int nL = left.size();
-    int nR = right.size();
-    int i = 0, j = 0, k = 0;
 
-    while (j < nL && k < nR)
-    {
-        if (left[j].vertex[0].z < right[k].vertex[0].z) {
-            bars[i] = left[j];
-            j++;
-        }
-        else {
-            bars[i] = right[k];
-            k++;
-        }
-        i++;
-    }
-    while (j < nL) {
-        bars[i] = left[j];
-        j++; i++;
-    }
-    while (k < nR) {
-        bars[i] = right[k];
-        k++; i++;
-    }
-}
-
-
-void sort(vector<plane>& bar) {
-    if (bar.size() <= 1) return;
-
-    int mid = bar.size() / 2;
-    vector<plane> left;
-    vector<plane> right;
-
-    for (size_t j = 0; j < mid; j++)
-        left.push_back(bar[j]);
-    for (size_t j = 0; j < (bar.size()) - mid; j++)
-        right.push_back(bar[mid + j]);
-
-    sort(left);
-    sort(right);
-    mergeSort(left, right, bar);
-}
 
 
 class model
@@ -106,7 +62,6 @@ public:
         planes.insert(planes.end(), watch->planes.begin(), watch->planes.end());
         planes.insert(planes.end(), obj2->planes.begin(), obj2->planes.end());
 
-        sort(planes);
        
         delete(obj2);
         delete(obj3);

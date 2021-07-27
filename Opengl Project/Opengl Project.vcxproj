@@ -30,7 +30,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TODO.txt" />
+    <Text Include="old.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clock.h" />

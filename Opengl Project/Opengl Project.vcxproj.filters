@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TODO.txt">
+    <Text Include="old.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -2,34 +2,51 @@
 #include"Basic.h"
 #include<algorithm>
 #include<thread>
-bool terminateThread = 0;
+float Ia = 0.4;
+float Ka = 0.8;
+float Ip = 1;
+float kd = 0.7;
 
 class plane
 {
 public:
-    plane(coordinate3f a = coordinate3f(), coordinate3f b = coordinate3f(), coordinate3f c = coordinate3f(), coordinate3f _ref = coordinate3f(), coordinate3f _color = coordinate3f(255,255,0))
+    plane(coordinate3f a = coordinate3f(), coordinate3f b = coordinate3f(), coordinate3f c = coordinate3f(), coordinate3f _ref = coordinate3f(), coordinate3f _color = coordinate3f(255,255,255))
     {
         ref = _ref;
-        color = _color;
+        color = coordinate3f(_color.x/255,_color.y/255,_color.z/255);
+        
         vertex = { a, b,c };
-
         sort();
         getnormal();
     }
 
     vector<coordinate3f> vertex;
+    float I[3] = {0};
     coordinate3f color;
-    coordinate3f ref;
-    coordinate3f normal, centroid, vertexNormal[3];
-    int count;
+    coordinate3f ref, centroid;
+    coordinate3f normal, vertexNormal[3];
+    
     void sort()
     {
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3 - 1; j++)
-                if (vertex[j].z < vertex[j + 1].z)
+                if (vertex[j].y > vertex[j + 1].y)
+                {
                     swap(vertex[j], vertex[j + 1]);
+                    swap(I[j], I[j + 1]);
+                }
     }
     
+    void vertexIntensities()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            I[i] = Ia*Ka + Ip * kd * (!normal^ !(vertex[i]- worldprops::pointlight));
+            I[i] = I[i] > 1 ? 1 : I[i];
+        }
+    }
+
+
     void getnormal()
     {
         centroid = (vertex[0] + vertex[1] + vertex[2]) / 3;
@@ -46,8 +63,8 @@ public:
             }
             vertexNormal[i] = !vertexNormal[i];
         }
+        vertexIntensities();
     }
-    
 
     plane scale(coordinate3f scalefactor)
     {
@@ -130,6 +147,9 @@ public:
 
     void newdraw()
     {
+        worldprops::pointlight = worldprops::camera;
+        vertexIntensities();
+
         vector<coordinate2i> t = {
                                         coordinate2i(vertex[0].x,vertex[0].y),
                                         coordinate2i(vertex[1].x,vertex[1].y),
@@ -144,17 +164,14 @@ public:
         if (t[0].y == t[1].y && t[1].y == t[2].y)
             return;
 
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3 - 1; j++)
-                if (t[j].y > t[j + 1].y)
-                    swap(t[j], t[j + 1]);
-
         
         if (RASTERIZE)
         {
             coordinate2i temp;
             vector<int> point;
-            for (int y = t[0].y; y<=t[1].y; y++)
+            
+            float I4, I5, Ip;
+            for(int y = t[0].y; y<t[1].y; y++)
             {
                 point = {
                                     newGetIntersectPoint(t[0], t[1], y),
@@ -167,20 +184,50 @@ public:
                 if (point[0] > point[1])
                     swap(point[0], point[1]);
                 
+                coordinate2i p4(point[0],y);
+                coordinate2i p5(point[1],y);
                 temp.y = y;
+        
+                //1->1
+                //2->0
+                //3->2
+
+                if (t[0].y != t[1].y)
+                    I4 = ((y - t[0].y) * I[1] + (t[1].y - y) * I[0]) / (t[1].y - t[0].y);
+                else
+                    I4 =  1;
+        
+                //1->1
+                //2->0
+                //3->2
+
+                if (t[0].y != t[2].y)
+                    I5 = ((y - t[2].y) * I[0] + (t[0].y - y) * I[2]) / (t[0].y - t[2].y);
+                else
+                    I5 =  1;
+        
+
                 for (int x = point[0]; x <=point[1]; x++)
                 {
-                    temp.x = x;
-                    putpixel(temp, color);
-                }
-            }
+                    //1->1
+                    //2->0
+                    //3->2
 
-            for (int y = t[1].y; y <=t[2].y; y++)
+                    temp.x = x;
+                    Ip = I4;
+                    if (p4.x != p5.x)
+                        Ip = ((x - p5.x) * I4 + (p4.x - x) * I5) / (p4.x - p5.x);
+                    putpixel(temp, color%Ip);
+                }
+            }   
+            
+            for (int y = t[1].y; y <= t[2].y; y++)
             {
+
                 point = {
-                                            newGetIntersectPoint(t[1], t[2], y),
-                                            newGetIntersectPoint(t[0], t[2], y),
-                         };
+                              newGetIntersectPoint(t[1], t[2], y),
+                              newGetIntersectPoint(t[0], t[2], y),
+                };
 
                 if (point[0] == INT_MAX)
                     point[0] = t[1].x;
@@ -188,11 +235,29 @@ public:
                 if (point[0] > point[1])
                     swap(point[0], point[1]);
 
+
+                coordinate2i p4(point[0], y);
+                coordinate2i p5(point[1], y);
                 temp.y = y;
-                for (int x = point[0]; x <=point[1]; x++)
+
+                if (t[0].y != t[1].y)
+                    I4 = (I[1] - I[0]) / (t[1].y - t[0].y) * (y - t[0].y) + I[0];
+                else
+                    I4 = I[0];
+
+                if (t[1].y != t[2].y)
+                    I5 = (I[2] - I[1]) / (t[2].y - t[1].y) * (y - t[1].y) + I[1];
+                else
+                    I5 = I[1];
+
+                for (int x = point[0]; x <= point[1]; x++)
                 {
                     temp.x = x;
-                    putpixel(temp, color);
+                    Ip = I4;
+                    if (p4.x != p5.x)
+                        Ip = (I5 - I4) / (p5.x - p4.x) * (x - p4.x) + I4;
+                    
+                    putpixel(temp, color % Ip);
                 }
             }
 
@@ -206,7 +271,7 @@ public:
         else
         {
             glVertexPointer(2, GL_INT, 0, &t[0]);
-            glColor3d(color.x/255, color.y/255, color.z/255);
+            glColor3d(color.x, color.y, color.z);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             if (Mesh)
             {
@@ -221,112 +286,12 @@ public:
 
                 glVertexPointer(2, GL_INT, 0, &m[0]);
                 glColor3d(0, 0, 0);
-                glLineWidth(2);
+                glLineWidth(1);
                 glDrawArrays(GL_LINES, 0, 6);
             }
         }
     }
-    
-    void draw()
-    {
-        vector<coordinate2i> t = {
-                                        coordinate2i(vertex[0].x,vertex[0].y),
-                                        coordinate2i(vertex[1].x,vertex[1].y),
-                                        coordinate2i(vertex[2].x,vertex[2].y),
-        };
-
-        if (t[0] == t[1] || t[1] == t[2] || t[0] == t[2])
-            return;
-        if (t[0].x == t[1].x && t[1].x == t[2].x)
-            return;
-
-        if (t[0].y == t[1].y && t[1].y == t[2].y)
-            return;
-
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3 - 1; j++)
-                if (t[j].x > t[j + 1].x)
-                    swap(t[j], t[j + 1]);
-
-        
-        if (RASTERIZE)
-        {
-            coordinate2i temp;
-            vector<int> point;
-            for (int x = t[0].x; x <=t[1].x; x++)
-            {
-                point = {
-                                                GetIntersectPoint(t[0], t[1], x),
-                                                GetIntersectPoint(t[0], t[2], x),
-                };
-                
-                if (point[0] == INT_MAX)
-                    point[0] = t[1].y;
-
-                if (point[0] > point[1])
-                    swap(point[0], point[1]);
-                
-                temp.x = x;
-                for (int y = point[0]; y <=point[1]; y++)
-                {
-                    temp.y = y;
-                    putpixel(temp, color);
-                }
-            }
-
-            for (int x = t[1].x; x <=t[2].x; x++)
-            {
-                point = {
-                                            GetIntersectPoint(t[1], t[2], x),
-                                            GetIntersectPoint(t[0], t[2], x),
-                         };
-
-                if (point[0] == INT_MAX)
-                    point[0] = t[1].y;
-
-                if (point[0] > point[1])
-                    swap(point[0], point[1]);
-
-                temp.x = x;
-                for (int y = point[0]; y <=point[1]; y++)
-                {
-                    temp.y = y;
-                    putpixel(temp, color);
-                }
-            }
-
-            if (Mesh)
-            {
-                Bresenham_Line(t[0], t[1], coordinate3f(0, 0, 0));
-                Bresenham_Line(t[0], t[2], coordinate3f(0, 0, 0));
-                Bresenham_Line(t[1], t[2], coordinate3f(0, 0, 0));
-            }
-        }
-        else
-        {
-            glVertexPointer(2, GL_INT, 0, &t[0]);
-            glColor3d(color.x/255, color.y/255, color.z/255);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-            if (Mesh)
-            {
-                vector<coordinate2i> m = {
-                                         t[0],
-                                         t[1],
-                                         t[1],
-                                         t[2],
-                                         t[2],
-                                         t[0],
-                };
-
-                glVertexPointer(2, GL_INT, 0, &m[0]);
-                glColor3d(0, 0, 0);
-                glLineWidth(2);
-                glDrawArrays(GL_LINES, 0, 6);
-            }
-        }
-    }
-    
-    
+       
     void print()
     {
         cout << "===========================" << endl;
@@ -367,15 +332,6 @@ vector<plane> genPlane(vector<coordinate3f> vertices1, vector<coordinate3f> vert
     return planes;
 };
 
-
-
-void threadprocess(vector<plane> planes)
-{
-    for (auto i : planes)
-        i.draw();
-    terminateThread = 1;
-}
-
 vector<plane> backfacecull(vector<plane> planes)
 {
     vector<plane> selected;
@@ -389,9 +345,73 @@ vector<plane> backfacecull(vector<plane> planes)
     return selected;
 }
 
+void merge(vector<plane>& left, vector<plane>& right, vector<plane>& bars)
+{
+    int nL = left.size();
+    int nR = right.size();
+    int i = 0, j = 0, k = 0;
+
+    while (j < nL && k < nR)
+    {
+        if (left[j].centroid.z < right[k].centroid.z) {
+            bars[i] = left[j];
+            j++;
+        }
+        else {
+            bars[i] = right[k];
+            k++;
+        }
+        i++;
+    }
+    while (j < nL) {
+        bars[i] = left[j];
+        j++; i++;
+    }
+    while (k < nR) {
+        bars[i] = right[k];
+        k++; i++;
+    }
+}
+
+
+void sort(vector<plane>& bar) {
+    if (bar.size() <= 1) return;
+
+    int mid = bar.size() / 2;
+    vector<plane> left;
+    vector<plane> right;
+
+    for (size_t j = 0; j < mid; j++)
+        left.push_back(bar[j]);
+    for (size_t j = 0; j < (bar.size()) - mid; j++)
+        right.push_back(bar[mid + j]);
+
+    sort(left);
+    sort(right);
+    merge(left, right, bar);
+}
+
+void world()
+{
+    cout << "Hello World"<<endl;
+}
+void threadSort(vector<plane> &planes)
+{
+    vector<plane> left,right;
+
+    left.insert(left.end(), planes.begin(), planes.begin() + planes.size() / 2);
+    right.insert(right.end(), planes.begin() + planes.size() / 2, planes.end());
+    
+    
+    cout << "Is kuskjsahhfuas";
+    merge(left, right,planes);
+}
+
+
 void draw(vector<plane> planes)
 {
     vector<plane> selected = backfacecull(planes);
+    sort(selected);
     cout<<"Planes selected to be drawn" << selected.size() << endl;
     for (auto i : selected)
         i.newdraw();

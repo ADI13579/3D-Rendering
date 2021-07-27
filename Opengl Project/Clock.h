@@ -105,7 +105,6 @@ public:
     vector<plane> planes;
     Clock(int _radius = 0, coordinate3f _clockCenter = coordinate3f(), GLfloat _edge = 0,coordinate3f *_pivot=new coordinate3f())
     {
-        rotx = roty = rotz = 0;
         pivot = _pivot;
         radius = 0.9 * _radius;
         edge = _edge;

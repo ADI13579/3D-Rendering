@@ -35,28 +35,32 @@ public:
         GLfloat c1 = t.x,c2 = t.y, c3 = t.z;
         return coordinate3f(b2 * c3 - b3 * c2, b3 * c1 - b1 * c3, b1 * c2 - b2 * c1);
     }
-    GLfloat operator ~ (){
-        return sqrt(x * x + y * y + z * z);
+
+    coordinate3f operator % (float m) {
+        return coordinate3f(m * x, m * y, m * z);
     }
+
     coordinate3f operator / (GLfloat t) {
         return coordinate3f(x / t, y / t, z / t);
     }
 
     coordinate3f operator ! (){
-        
-        if (~*this == 0)
-            return *this;
+        GLfloat len = sqrt(x * x + y * y + z * z);
+        if (len == 0)
+            return coordinate3f(0,0,0);
 
-        return *this / ~(*this);
+        return *this / len;
     }
 
     bool operator == (coordinate3f t){
         return (x == t.x) && (y == t.y) && (z == t.z);
     }
+
     coordinate3f integer()
     {
         return coordinate3f(int(x+0.5), int(y+0.5), int(z+0.5));
     }
+
     coordinate3f rotation(GLfloat alpha, bool _x ,bool _y,bool _z,coordinate3f pivot = coordinate3f())
     {
         alpha*=pi / 180;
@@ -109,7 +113,11 @@ public:
             return (_x * x, _y * y, _z * z);
     }
 
-
+    GLfloat distance(coordinate3f t)
+    {
+        t = *this - t;
+        return sqrt(t.x*t.x + t.y*t.y + t.z * t.z);
+    }
 };
 
 class coordinate2f

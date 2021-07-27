@@ -14,8 +14,6 @@ extern "C" {
     _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 }
 
-
-
 //extern "C" {
 //    _declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 //}
@@ -67,7 +65,7 @@ int main()
     plane test3(coordinate3f(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,0), coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(0,0,0));
    */
 
-    plane test1(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0));
+    plane test1(coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0),modelCenter, coordinate3f(255, 255, 0));
     plane test2(coordinate3f(0, 0, 0), coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0), coordinate3f(SCREEN_WIDTH, 0, 0));
     plane test3(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0), coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0), coordinate3f(SCREEN_WIDTH, 0, 0));
     plane test4(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0), coordinate3f(0, SCREEN_HEIGHT, 0), coordinate3f(0, 0, 0));
@@ -83,7 +81,8 @@ int main()
     glEnableClientState(GL_VERTEX_ARRAY);
 
 
-    Sphere test(505, 150, 150, coordinate3f(SCREEN_WIDTH / 2, 0, -500), 0, coordinate3f(191, 86, 119));
+    Sphere test(200, 50, 50, coordinate3f(SCREEN_WIDTH / 2, SCREEN_WIDTH/2, -500), 0, coordinate3f(191, 86, 119));
+
     while(!glfwWindowShouldClose(window))
     {
         glEnable(GL_POINT_SMOOTH);
@@ -102,8 +101,9 @@ int main()
         //test4.draw();
 
         //Model.Draw();
-         
+
         draw(test.planes);
+        
         glPopMatrix();
         
         glfwSwapBuffers(window);

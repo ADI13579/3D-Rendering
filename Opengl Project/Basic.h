@@ -32,8 +32,9 @@ namespace worldprops
                                coordinate3f(0,0,0),
     };
 
-    static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.4, -0);
-
+    static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.4, 0);
+    static coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
+    
     void rotate(GLfloat alpha, bool _x, bool _y, bool _z)
     {
         for (int i = 0; i < 3; i++)
@@ -58,20 +59,29 @@ void DrawPoint(vector<coordinate3f> vertices, coordinate3f color, int pointsize 
 
 void putpixel(coordinate2i pixel, coordinate3f color)
 {
-    glColor3f(color.x / 255, color.y / 255, color.z / 255);
+    glColor3fv(&color.x);
     glVertexPointer(2, GL_INT, 0, &pixel.x);
     glDrawArrays(GL_POINTS, 0, 1);
 }
 
+void putpixel(vector<coordinate2i> pixel, coordinate3f color)
+{
+    glColor3fv(&color.x);
+    glVertexPointer(2, GL_INT, 0, &pixel[0].x);
+    glDrawArrays(GL_POINTS, 0, pixel.size());
+}
+
 void putpixel(coordinate3f pixel, coordinate3f color)
 {
-    glColor3f(color.x / 255, color.y / 255, color.z / 255);
+    glColor3f(color.x, color.y, color.z);
     glVertexPointer(3, GL_FLOAT, 0, &pixel.x);
     glDrawArrays(GL_POINTS, 0, 1);
 }
 
 void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
 {
+    vector<coordinate2i> Breshenham_Points;
+
     coordinate2i temp;
     int x1 = a.x, x2 = b.x;
     int y1 = a.y, y2 = b.y;
@@ -112,6 +122,7 @@ void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
             y1 += yinc;
         }
         x1 += 1;
-        putpixel(temp, color);
+        Breshenham_Points.push_back(temp);
     }
+    putpixel(Breshenham_Points, coordinate3f());
 }
