@@ -8,10 +8,11 @@ using namespace std;
 #define pi 3.14159
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
-bool Mesh = 1;
-bool RASTERIZE = 0;
+bool Mesh = 1;//enables or disables mesh to be drawn in triangular planes
+bool RASTERIZE = 0;//Enables or disables the SELF WRITTEN Rasterizing process
 GLFWwindow* window;
 
+//IS SUPPOSED TO CONTAIN THE PROPERTIES OF THE WORLD LIKE CAMERA,POINTLIGHT,etc...
 namespace worldprops
 {
     static coordinate3f Rot[3] = {
@@ -33,30 +34,10 @@ namespace worldprops
     };
 
     static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 1.4, 0);
-    static coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
-    
-    void rotate(GLfloat alpha, bool _x, bool _y, bool _z)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            Rot[i] = Rot[i].rotation(alpha, _x, _y, _z);
-        }
-    }
+    static coordinate3f pointlight(0,0,0);
 };
 
-
-void DrawPoint(vector<coordinate3f> vertices, coordinate3f color, int pointsize = 2)
-{
-    int n = vertices.size();
-    GLfloat* pointVertex = &vertices[0].x;
-    glEnable(GL_POINT_SMOOTH);
-    glPointSize(pointsize);
-    glColor3d(color.x, color.y, color.z);
-    glVertexPointer(3, GL_FLOAT, 0, pointVertex);
-    glDrawArrays(GL_POINTS, 0, n);
-    glDisable(GL_POINT_SMOOTH);
-}
-
+//putpixel for coordinate2i
 void putpixel(coordinate2i pixel, coordinate3f color)
 {
     glColor3fv(&color.x);

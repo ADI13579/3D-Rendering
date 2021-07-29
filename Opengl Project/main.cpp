@@ -81,7 +81,11 @@ int main()
     glEnableClientState(GL_VERTEX_ARRAY);
 
 
-    Sphere test(200, 50, 50, coordinate3f(SCREEN_WIDTH / 2, SCREEN_WIDTH/2, -500), 0, coordinate3f(191, 86, 119));
+    //Sphere test(200, 50, 50, coordinate3f(SCREEN_WIDTH / 2, SCREEN_WIDTH/2, -500), 0, coordinate3f(191, 86, 119));
+    Object test(200,200,200,1,4, coordinate3f(SCREEN_WIDTH / 2, SCREEN_WIDTH/2, -500),coordinate3f(191, 86, 119));
+    
+    for (int i = 0; i < test.planes.size(); i++)
+        test.planes[i] = test.planes[i].rotate(30, 1, 0, 0, test.baseCenter);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -171,8 +175,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         
         worldprops::Scale[0].x = worldprops::Scale[0].x < 0 ? 0 : worldprops::Scale[0].x;
         worldprops::Scale[1].y = worldprops::Scale[1].y < 0 ? 0 : worldprops::Scale[1].y;
-        worldprops::Scale[2].z = worldprops::Scale[2].z < 0 ? 0 : worldprops::Scale[2].z;
-        
-        worldprops::rotate(alpha, x, y, z);
+        worldprops::Scale[2].z = worldprops::Scale[2].z < 0 ? 0 : worldprops::Scale[2].z;    
     }
 }
