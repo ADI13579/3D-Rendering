@@ -9,13 +9,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="simpleplane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -25,25 +27,28 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sphere.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="coordinate.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Clock.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="model.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Basic.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="plane.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="parser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="plane_t.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="simpleplane.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="material.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
