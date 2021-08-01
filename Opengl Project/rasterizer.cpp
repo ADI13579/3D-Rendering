@@ -1,21 +1,9 @@
 #pragma once
 #include"plane_t.h"
 #include"Basic.h"
+#include<algorithm>.h
+void debug();
 
-int plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
-{
-    if (a.x == b.x)
-        return a.x;
-
-    if (a.y == b.y)
-        return INT_MAX;
-
-    float m = (b.y - a.y) / float((b.x - a.x));
-    float c = (a.y - m * a.x);
-    int x = (y - c) / m;
-
-    return x;
-}
 
 void plane_t::calculateIntensities()
 {
@@ -29,13 +17,13 @@ void plane_t::calculateIntensities()
     //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
     for (int i = 0; i < 3; i++)
     {
-        I[i] = kd;
+        I[i] = kd*0.3;
  
         float a = (!vn[i] ^ !(pointlight - v[i]));
         if(a>0) I[i] =I[i]+ kd*a;
 
         a = !(v[i] * 2 - pointlight - camera) ^ !vn[i];
-        if (a > 0) I[i] = ks * (pow(a, Ns));
+        if (a > 0) I[i] =I[i]+ks * (pow(a, Ns));
 
         I[i].x = I[i].x> 1 ? 1 : I[i].x;
         I[i].y = I[i].y> 1 ? 1 : I[i].y;
@@ -47,6 +35,36 @@ void plane_t::print()
 {
     material::print();
     simpleplane::print();
+}
+
+
+int plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
+{
+    if (a.y > b.y)
+        std::swap(a, b);
+
+    //check if there exists a intersection point
+    if (y<a.y || y>b.y)
+        return INT_MAX;
+
+    //if a.y==b.y means that the x value would just be many
+    //but return the largest
+    if (a.y == b.y)
+    {
+        int c = (a.x > b.x) ? a.x : b.x;
+        return c;
+    }
+
+    //if the x of two points is same then (x,y) is the 
+    //intersection point hence return x itself
+
+    if (a.x == b.x)
+        return a.x;
+
+    float m = (b.y - a.y) / float((b.x - a.x));
+    float c = (a.y - m * a.x);
+    int x = (y - c) / m;
+    return x;
 }
 //RASTERIZING PART
 void plane_t::draw()
@@ -82,81 +100,91 @@ void plane_t::draw()
         coordinate2i temp;
         std::vector<int> point;
         coordinate3f I4, I5, Ip;
-        for (int y = t[0].y; y < t[1].y; y++)
+
+        for (int y = t[0].y; y <=t[1].y; y++)
         {
-            point = {
-                                GetIntersectPoint(t[0], t[1], y),
-                                GetIntersectPoint(t[0], t[2], y),
-            };
-
-            if (point[0] == INT_MAX)
-                point[0] = t[1].x;
-
-            if (point[0] > point[1])
-                std::swap(point[0], point[1]);
-            
-
-            //2->0
-            //1->1
-            //3->2
-
-            //I4 and I5 can be negative giving problems
-            if (t[1].y != t[0].y)
-                I4 = I[0] + (I[1].y-I[0].y)*(y - v[0].y) / (v[1].y - v[0].y);
-            
-            if(t[0].y!=t[2].y)
-                I5 = I[0] + (I[2].y - I[0].y) * (y - v[0].y) / (v[2].y - v[0].y);
-            
-            
-            coordinate2i p4(point[0], y);
-            coordinate2i p5(point[1], y);
-            temp.y = y;
-            
-            for(int x = point[0]; x <= point[1]; x++)
+            I4 = I[0];
+            if (v[1].y != v[0].y)
             {
-                temp.x = x;
-                //color = I4+(I5-I4)*(x-point[0])/(point[1]-point[0]);
-                color = kd;
-                if(color.x < 0) color.x=0;
-                if(color.y < 0) color.y=0;
-                if(color.z < 0) color.z=0;
-                
-                putpixel(temp, color);
+                coordinate3f colorT = (I[1] - I[0]) * ((y - v[0].y) / (v[1].y - v[0].y));
+                I4 = I4 + colorT;
             }
-        }
 
-        for (int y = t[1].y; y <= t[2].y; y++)
-        {
+
+            I5 = I[0];
+            if (v[0].y != v[2].y)
+            {
+                coordinate3f colorT = (I[2] - I[0]) * (y - v[0].y) / (v[2].y - v[0].y);
+                I5 = I[0] + colorT;
+            }
 
             point = {
-                          GetIntersectPoint(t[1], t[2], y),
-                          GetIntersectPoint(t[0], t[2], y),
+                         GetIntersectPoint(t[0], t[1], y),
+                         GetIntersectPoint(t[0], t[2], y),
             };
 
-            if (point[0] == INT_MAX)
-                point[0] = t[1].x;
-
             if (point[0] > point[1])
+            {
                 std::swap(point[0], point[1]);
-
-            //2->0
-            //1->1
-            //3->2
-
-
-            if (t[1].y != t[0].y)
-                I4 = I[0] + (I[1].y - I[0].y) * (y - v[0].y) / (v[1].y - v[0].y);
-            if (t[0].y != t[2].y)
-                I5 = I[0] + (I[2].y - I[0].y) * (y - v[0].y) / (v[2].y - v[0].y);
+                std::swap(I4, I5);
+            }
 
             coordinate2i p4(point[0], y);
             coordinate2i p5(point[1], y);
             temp.y = y;
+
             for (int x = point[0]; x <= point[1]; x++)
             {
                 temp.x = x;
-                color = kd;
-                //color = I4 + (I5 - I4) * (x - point[0]) / (point[1] - point[0]);
+                color = I4;
+                if (point[0] != point[1])
+                {
+                    coordinate3f colorT = (I5 - I4) * (x - point[0]) / (point[1] - point[0]);
+                    color = I4 + colorT;
+                }
+                putpixel(temp, color);
+            }
+        }
+        for (int y = t[1].y; y <=t[2].y; y++)
+        {
+            I4 = I[1];
+            if (v[1].y != v[2].y)
+            {
+                coordinate3f colorT = (I[2] - I[1]) * ((y - v[1].y) / (v[2].y - v[1].y));
+                I4 = I[1] + colorT;
+            }
+
+
+            I5 = I[0];
+            if (v[0].y != v[2].y)
+            {
+                coordinate3f colorT = (I[2] - I[0]) * (y - v[0].y) / (v[2].y - v[0].y);
+                I5 = I5 + colorT;
+            }
+
+            point = {
+                         GetIntersectPoint(t[1], t[2], y),
+                         GetIntersectPoint(t[0], t[2], y),
+            };
+            if (point[0] > point[1])
+            {
+                std::swap(point[0], point[1]);
+                std::swap(I4, I5);
+            }
+            coordinate2i p4(point[0], y);
+            coordinate2i p5(point[1], y);
+            temp.y = y;
+
+            
+            for (int x = point[0]; x <=point[1]; x++)
+            {
+                temp.x = x;
+                color = I4;
+                if (point[0] != point[1])
+                {
+                    coordinate3f colorT = (I5 - I4) * (x - point[0]) / (point[1] - point[0]);
+                    color = I4 + colorT;
+                }
                 putpixel(temp, color);
             }
         }
@@ -191,3 +219,9 @@ void plane_t::draw()
         }
     }
 }
+
+void debug()
+{
+    int a = 1;
+    std::cout << "what is wrong";
+};

@@ -39,6 +39,9 @@ public:
         GLfloat c1 = t.x,c2 = t.y, c3 = t.z;
         return coordinate3f(b2 * c3 - b3 * c2, b3 * c1 - b1 * c3, b1 * c2 - b2 * c1);
     }
+    coordinate3f operator * (float t) {
+        return coordinate3f(x*t,y*t,z*t);
+    }
 
     coordinate3f operator % (float m) {
         return coordinate3f(m * x, m * y, m * z);

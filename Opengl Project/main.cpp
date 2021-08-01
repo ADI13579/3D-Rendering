@@ -56,7 +56,7 @@ int main()
 
         for (auto i : temp)
         {
-            i.translate(coordinate3f(screenWidth / 2, screenHeight / 2, -500));
+            i.translate(coordinate3f(screenWidth / 2, 0, -500));
             i.draw();
         }
        
