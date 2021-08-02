@@ -2,8 +2,11 @@
 #include"plane_t.h"
 #include"Basic.h"
 #include<algorithm>.h
+
+#include"Shader.h"
 void debug();
 
+extern Shader myshader;
 
 void plane_t::calculateIntensities()
 {
@@ -118,6 +121,9 @@ void plane_t::draw(bool MESH=0)
             Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
         }
 }
+
+
+
 
 void debug()
 {

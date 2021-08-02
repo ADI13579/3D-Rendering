@@ -35,6 +35,7 @@
     <Text Include="old.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="coordinate.h" />
     <ClInclude Include="Basic.h" />
@@ -42,6 +43,7 @@
     <ClInclude Include="parser.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="plane_t.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="simpleplane.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
