@@ -1,7 +1,8 @@
 #include"plane_t.h"
 #include <sstream>
 #include <fstream>
-
+#include<algorithm>
+#include"Basic.h"
 //merge sort is use to sort on the basis of z and draw
 //maybe removed after camera
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars)
@@ -42,6 +43,7 @@ void sort(std::vector<plane_t>& bar) {
 
     for (size_t j = 0; j < mid; j++)
         left.push_back(bar[j]);
+    
     for (size_t j = 0; j < (bar.size()) - mid; j++)
         right.push_back(bar[mid + j]);
 
@@ -62,10 +64,10 @@ void sort(std::vector<plane_t>& bar) {
 
 
 //now again obj file is reopened and then which material 
-// is face using is scanned and then according to the 
+// the face is using is scanned and then according to the 
 // indices scanned plane is created and pushed to the vector
 
-//parser to load object files already divided into triangles
+//parser to load obj files already divided into triangles
 namespace parser
 {
         void transpose(std::vector<std::vector<int> >& b)
@@ -119,13 +121,13 @@ namespace parser
             if (!obj)
             {
                 std::cout << filename << " opening error" << std::endl;
-                std::cout << "error opening file";
                 return planes;
             }
 
             std::istringstream lineSS;
             std::vector<std::string> materialids;
             std::string lineType;
+            std::vector<float> normalizev[3];
             while (std::getline(obj, lineStr))
             {
                 lineSS = std::istringstream(lineStr);;
@@ -135,6 +137,9 @@ namespace parser
                     float x = 0, y = 0, z = 0;
                     lineSS >> x >> y >> z;
                     vertexes.push_back(coordinate3f(x, y, z));
+                    normalizev[0].push_back(x);
+                    normalizev[1].push_back(y);
+                    normalizev[2].push_back(z);
                 }
                 else if (lineType == "vt")
                 {
@@ -156,8 +161,25 @@ namespace parser
                 }
             }
             obj.close();
-
+            std::sort(normalizev[0].begin(), normalizev[0].end());
+            std::sort(normalizev[1].begin(), normalizev[1].end());
+            std::sort(normalizev[2].begin(), normalizev[2].end());
+            coordinate3f scale(
+                normalizev[0].back() - normalizev[0].front(),
+                normalizev[1].back() - normalizev[1].front(),
+                normalizev[2].back() - normalizev[2].front()
+            );
+            normalizev[0].clear();
+            normalizev[1].clear();
+            normalizev[2].clear();            
+            scale = coordinate3f(1 / scale.x, 1 / scale.y, 1 / scale.z);
             
+            float ratioyx = scale.y / scale.x;
+            float ratiozx = scale.z / scale.x;
+
+            for (int i = 0; i < vertexes.size(); i++)
+                vertexes[i] = vertexes[i].scaling(scale.x, scale.y, scale.z);
+
             std::fstream mtl(filename + ".mtl", std::ios::in);
             for (auto i : materialids)
             {
@@ -165,7 +187,7 @@ namespace parser
                 int a = mtl.tellg();
                 while (std::getline(mtl, lineStr))
                 {
-
+                     
                     if (lineStr == "newmtl " + i)
                     {
                         temp.id = i;
@@ -253,13 +275,12 @@ namespace parser
                                    textures[sep[1][2]]
                         };
                     }
+                    p.scale(SCREEN_WIDTH,SCREEN_HEIGHT,ratiozx*200);
                     p.makeCalculations();
                     planes.push_back(plane_t(p, materialBind));
                 }
             }
-
             sort(planes);
-            
             return planes;
-}
+        }
 };

@@ -3,7 +3,6 @@
 //calculates the values requires unaviable from the obj files
 void simpleplane::makeCalculations()
 {
-    scale(100, 100, 100);
     sort();
     if (v.empty())
         return;

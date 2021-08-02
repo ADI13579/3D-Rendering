@@ -105,12 +105,9 @@ void plane_t::draw(bool MESH=0)
                 W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y))/div;
                 W2 = 1.0 - W0 - W1;
                 
-                if (W0 >= 0 && W1 >= 0 && W2 >= 0)
-                {
-                    coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-                    temp.x = x;
-                    putpixel(temp, color);
-                }
+               coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+               temp.x = x;
+               putpixel(temp, color);
             }
         }
 
@@ -124,6 +121,5 @@ void plane_t::draw(bool MESH=0)
 
 void debug()
 {
-    int a = 1;
     std::cout << "what is wrong";
 };

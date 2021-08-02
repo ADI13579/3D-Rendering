@@ -39,12 +39,9 @@ public:
         GLfloat c1 = t.x,c2 = t.y, c3 = t.z;
         return coordinate3f(b2 * c3 - b3 * c2, b3 * c1 - b1 * c3, b1 * c2 - b2 * c1);
     }
+
     coordinate3f operator * (float t) {
         return coordinate3f(x*t,y*t,z*t);
-    }
-
-    coordinate3f operator % (float m) {
-        return coordinate3f(m * x, m * y, m * z);
     }
 
     coordinate3f operator / (GLfloat t) {
@@ -107,12 +104,9 @@ public:
         return temp;
     }
 
-    coordinate3f scaling(GLfloat sx=1, GLfloat sy=1, GLfloat sz=1, coordinate3f pivot = coordinate3f())
+    coordinate3f scaling(GLfloat sx=1, GLfloat sy=1, GLfloat sz=1)
     {
-        coordinate3f temp = *this - pivot;
-        temp = coordinate3f(temp.x * sx, temp.y * sy, temp.z * sz);
-        temp = temp + pivot;
-        return temp;
+        return coordinate3f(x * sx, y * sy, z * sz);
     }
  
     coordinate3f orthographic(bool _x, bool _y, bool _z)
