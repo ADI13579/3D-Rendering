@@ -4,9 +4,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include<vector>
+#define  PI  3.141592654
 
-
-#define pi 3.14159
 //+->addition
 // -=>subtraction
 //^->dot product
@@ -59,7 +58,6 @@ public:
     bool operator == (coordinate3f t){
         return (x == t.x) && (y == t.y) && (z == t.z);
     }
-
     coordinate3f integer()
     {
         return coordinate3f(int(x+0.5), int(y+0.5), int(z+0.5));
@@ -67,7 +65,7 @@ public:
 
     coordinate3f rotation(GLfloat alpha, bool _x ,bool _y,bool _z,coordinate3f pivot = coordinate3f())
     {
-        alpha*=pi / 180;
+        alpha*=PI / 180;
         coordinate3f temp = *this-pivot;
         GLfloat cosine = cos(alpha);
         GLfloat sine = sin(alpha);

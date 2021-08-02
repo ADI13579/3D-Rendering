@@ -1,10 +1,13 @@
 #pragma once
 #include <vector>
 #include"coordinate.h"
+#include"camera.h"
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
-static coordinate3f pointlight(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, -1000);
-static coordinate3f camera(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -1000);
+#define PI 3.14159
+static coordinate3f pointlight(0,0, -1000);
+static Camera mycamera(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 100));
+
 
 //putpixel for coordinate2i
 static void putpixel(coordinate2i pixel, coordinate3f color)

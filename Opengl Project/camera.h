@@ -1,8 +1,6 @@
 #pragma once
 #include"coordinate.h"
 
-
-
 #include <vector>
 void show_matrix(float mat[4][4]);
 
@@ -20,7 +18,7 @@ const float PITCH = 0.0f;
 const float SPEED = 20.0f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
-const float PI = 3.141592654;
+//Pi defined multiple files
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL

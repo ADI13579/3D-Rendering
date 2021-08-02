@@ -65,7 +65,6 @@ public:
 		delete[] ptr;
 	}
 	~Shader() {
-		
 	}
 
 	void setMat(std::string name, float Mat[4][4]) {
@@ -153,11 +152,9 @@ public:
 		plane.v[0] = v0;
 		plane.v[1] = v1;
 		plane.v[2] = v2;
-
+		plane.makeCalculations();
 
 		return plane;
 
 	}
-
-
 };

@@ -3,54 +3,11 @@
 #include <fstream>
 #include<algorithm>
 #include"Basic.h"
+//Inefficient parser
+
 //merge sort is use to sort on the basis of z and draw
 //maybe removed after camera
-void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars)
-{
-    int nL = left.size();
-    int nR = right.size();
-    int i = 0, j = 0, k = 0;
 
-    while (j < nL && k < nR)
-    {
-        if (left[j].centroid.z > right[k].centroid.z) {
-            bars[i] = left[j];
-            j++;
-        }
-        else {
-            bars[i] = right[k];
-            k++;
-        }
-        i++;
-    }
-    while (j < nL) {
-        bars[i] = left[j];
-        j++; i++;
-    }
-    while (k < nR) {
-        bars[i] = right[k];
-        k++; i++;
-    }
-}
-
-//part of above code
-void sort(std::vector<plane_t>& bar) {
-    if (bar.size() <= 1) return;
-
-    int mid = bar.size() / 2;
-    std::vector<plane_t> left;
-    std::vector<plane_t> right;
-
-    for (size_t j = 0; j < mid; j++)
-        left.push_back(bar[j]);
-    
-    for (size_t j = 0; j < (bar.size()) - mid; j++)
-        right.push_back(bar[mid + j]);
-
-    sort(left);
-    sort(right);
-    merge(left, right, bar);
-}
 
 //workflow
 //Obj file is opened first and then
@@ -275,12 +232,11 @@ namespace parser
                                    textures[sep[1][2]]
                         };
                     }
-                    p.scale(SCREEN_WIDTH,SCREEN_HEIGHT,ratiozx*200);
+                    p.scale(500,ratioyx*500,ratiozx*500);
                     p.makeCalculations();
                     planes.push_back(plane_t(p, materialBind));
                 }
             }
-            sort(planes);
             return planes;
         }
 };

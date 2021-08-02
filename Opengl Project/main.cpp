@@ -2,9 +2,11 @@
 #include"parser.h"
 #include"Basic.h"
 #include"Shader.h"
-#include"camera.h"
+#include"mergesort.cpp"
+
 //-z is out of the screen +z is inside screen
-#define pi 3.14159
+void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
+void sort(std::vector<plane_t>& bar);
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -14,27 +16,51 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-Shader myshader;
-Camera mycamera;
+static Shader myshader;
+//camera variable shifted to basic.h
 
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
+float lastX = SCREEN_WIDTH / 2.0f;
+float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
+
+void ClearWindow()
+{
+    glClearColor(0.58, 0.89, 0.96, 0.50);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPushMatrix();
+    glEnable(GL_POINT_SMOOTH);
+    glPointSize(1);
+}
+
+std::vector<plane_t> backFaceCull(std::vector<plane_t> planes)
+{
+    std::vector<plane_t> selected;
+    for (auto i : planes)
+        if (((mycamera.Front*-1) ^ i.centroidNormal) <= 0)
+            selected.push_back(i);
+    return selected;
+}
+
+std::vector<plane_t> ViewFromCamera(std::vector<plane_t> planes)
+{
+    std::vector<plane_t> cameraView;
+    for (auto i : planes)
+        cameraView.push_back(myshader.getShadedPlane(i));
+    return cameraView;
+}
 
 
 int main()
 {
     GLFWwindow* window; //handle for the main drawable window 
-    std::vector<plane_t> temp=parser::parse("Cube");
+    std::vector<plane_t> planes=parser::parse("Cube");
+    sort(planes);
+    for (int i = 0; i < planes.size(); i++)
+        planes[i].translate(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000));
     
     if (!glfwInit())
         return -1;
@@ -57,8 +83,6 @@ int main()
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
 
-    double currentTime, previousTime;
-    currentTime = previousTime = 0;
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     glMatrixMode(GL_PROJECTION);
@@ -71,16 +95,14 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
 
+
+        ClearWindow();
         // per-frame time logic
-// --------------------
+        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
+        std::cout << "FPS:" << 1 / deltaTime << std::endl;
         lastFrame = currentFrame;
-
-
-        glEnable(GL_POINT_SMOOTH);
-        glPointSize(1);
-
 
         // set the projection matrix;
         float projMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
@@ -94,36 +116,24 @@ int main()
         // set the model matrix
         float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         myshader.setMat("model", modelMat);
-        // Note: For n object use above code inside loop and change the model matrix accordingly.
+        
+        //let this be as a function to make easy to work
+        //later sorting is necessary for knowing which surface lies behind or front(image processing type)
+        //however below two functions can be combined later to make it efficient
+        //enable this for camera view
 
 
-
-
-
-        currentTime = glfwGetTime();
-        std::cout << "FPS:" << 1 / (currentTime - previousTime) <<std::endl;
-        std::cout << temp.size();
-
-        glClearColor(0.0f, 0, 0, 0.5f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glPushMatrix();
-
-        for (auto i : temp)
-        {
-            i.translate(coordinate3f(screenWidth / 2, 0, 100));
-
-            // get the new shaded plane here!
-
-            // i(old) ----> i(new) shaded
-            i = myshader.getShadedPlane(i);
-
+        //to be done divide planes into two parts then procees the following two portions in two threads
+        std::vector<plane_t> selectedPlane = backFaceCull(planes);
+        std::vector<plane_t> view = ViewFromCamera(selectedPlane);
+  
+       // sort(view);
+        for (auto i : view)
             i.draw(0);
-        }
-       
+ 
         glPopMatrix();
         glfwSwapBuffers(window);
         glfwPollEvents();
-        previousTime = currentTime;
     }
 
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -151,7 +161,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 
-
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -177,4 +186,51 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     mycamera.ProcessMouseScroll(yoffset);
+}
+
+void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars)
+{
+    int nL = left.size();
+    int nR = right.size();
+    int i = 0, j = 0, k = 0;
+
+    while (j < nL && k < nR)
+    {
+        if (left[j].centroid.z > right[k].centroid.z) {
+            bars[i] = left[j];
+            j++;
+        }
+        else {
+            bars[i] = right[k];
+            k++;
+        }
+        i++;
+    }
+    while (j < nL) {
+        bars[i] = left[j];
+        j++; i++;
+    }
+    while (k < nR) {
+        bars[i] = right[k];
+        k++; i++;
+    }
+}
+
+//part of above code
+void sort(std::vector<plane_t>& bar) {
+    if (bar.size() <= 1) return;
+
+    int mid = bar.size() / 2;
+    std::vector<plane_t> left;
+    std::vector<plane_t> right;
+
+    for (size_t j = 0; j < mid; j++)
+        left.push_back(bar[j]);
+
+    for (size_t j = 0; j < (bar.size()) - mid; j++)
+        right.push_back(bar[mid + j]);
+
+    sort(left);
+    sort(right);
+    merge(left, right, bar);
 }

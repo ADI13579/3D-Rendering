@@ -2,9 +2,7 @@
 #include"plane_t.h"
 #include"Basic.h"
 #include<algorithm>.h
-
 #include"Shader.h"
-void debug();
 
 extern Shader myshader;
 
@@ -25,7 +23,7 @@ void plane_t::calculateIntensities()
         float a = (!vn[i] ^ !(pointlight - v[i]));
         if(a>0) I[i] =I[i]+ kd*a;
 
-        a = !(v[i] * 2 - pointlight - camera) ^ !vn[i];
+        a = !(v[i] * 2 - pointlight - mycamera.Position) ^ !vn[i];
         if (a > 0) I[i] =I[i]+ks * (pow(a, Ns));
 
         I[i].x = I[i].x> 1 ? 1 : I[i].x;
@@ -70,15 +68,12 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
     return x;
 }
 //RASTERIZING PART
-void plane_t::draw(bool MESH=0)
+void plane_t::draw(bool MESH)
 {
     float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
     if (div == 0)
         return;
 
-    //back face culling
-    /*if (((camera-centroid)^centroidNormal)<0)
-        return;*/
     calculateIntensities();
 
     std::vector<coordinate2i> t = {
@@ -87,45 +82,37 @@ void plane_t::draw(bool MESH=0)
                                     coordinate2i(v[2].x,v[2].y),
     };
 
-        for (int y = t[0].y; y <=t[2].y; y++)
-        {
-            coordinate2i temp(0,y);
-            std::vector<float> point={
-                         GetIntersectPoint(t[0], t[1], y),
-                         GetIntersectPoint(t[1], t[2], y),
-                         GetIntersectPoint(t[2], t[0], y),
-            };
+     for (int y = t[0].y; y <=t[2].y; y++)
+     {
+         coordinate2i temp(0,y);
+         std::vector<float> point={
+                      GetIntersectPoint(t[0], t[1], y),
+                      GetIntersectPoint(t[1], t[2], y),
+                      GetIntersectPoint(t[2], t[0], y),
+         };
 
-            std::sort(point.begin(), point.end());
-            if (point[2]== INT_MAX)
-                point.pop_back();
+         std::sort(point.begin(), point.end());
+         if (point[2] == INT_MAX)
+             point.pop_back();
 
-            for (int x = point[0]; x <= point[1]; x++)
-            {
-                float W0, W1, W2;
-                
-                W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y))/div;
-                W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y))/div;
-                W2 = 1.0 - W0 - W1;
-                
-               coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-               temp.x = x;
-               putpixel(temp, color);
-            }
-        }
+         for (int x = point[0]; x <= point[1]; x++)
+         {
+             float W0, W1, W2;
 
-        if (MESH)
-        {
-            Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1));
-            Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1));
-            Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
-        }
+             W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
+             W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
+             W2 = 1.0 - W0 - W1;
+             
+             coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+             temp.x = x;
+             putpixel(temp, color);
+         }
+
+     }
+     if (MESH)
+     {
+         Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1));
+         Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1));
+         Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
+     }
 }
-
-
-
-
-void debug()
-{
-    std::cout << "what is wrong";
-};
