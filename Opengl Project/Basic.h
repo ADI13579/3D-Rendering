@@ -3,9 +3,8 @@
 #include"coordinate.h"
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
-static coordinate3f pointlight(0,0,-1000);
-static coordinate3f camera(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000);
-
+static coordinate3f pointlight(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, -1000);
+static coordinate3f camera(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -1000);
 
 //putpixel for coordinate2i
 static void putpixel(coordinate2i pixel, coordinate3f color)

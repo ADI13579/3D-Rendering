@@ -1,7 +1,7 @@
 #pragma once
 #include"parser.h"
 #include"Basic.h"
-
+//-z is out of the screen +z is inside screen
 #define pi 3.14159
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -56,8 +56,8 @@ int main()
 
         for (auto i : temp)
         {
-            i.translate(coordinate3f(screenWidth / 2, 0, -500));
-            i.draw();
+            i.translate(coordinate3f(screenWidth / 2, screenHeight/2, 100));
+            i.draw(0);
         }
        
         glPopMatrix();

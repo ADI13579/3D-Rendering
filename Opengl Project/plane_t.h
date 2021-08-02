@@ -7,7 +7,7 @@ class plane_t :public simpleplane, public material
 public:
     //to be calculated
     //=========================
-    coordinate3f I[3];//intensity was supposed to be stored but shading not implemented
+    coordinate3f I[3];
     plane_t() {};
     plane_t(simpleplane _p, material _m)
     {
@@ -30,12 +30,11 @@ public:
 
     //Gets the x of intersect point return INT_MAX if the line is vertical 
     //code in rasterize.h
-    int GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
-    void draw();
+    float GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
+    void draw(bool);
     void calculateIntensities();
     void print();
 
-    
 };
 //merge sort is implemented to sort the output after backface culling
 //First the plane  that lies far away is drawn firstand then the near plane that lies is drawn over that palne

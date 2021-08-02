@@ -3,7 +3,7 @@
 //calculates the values requires unaviable from the obj files
 void simpleplane::makeCalculations()
 {
-    scale(500, 500, 500);
+    scale(100, 100, 100);
     sort();
     if (v.empty())
         return;
@@ -25,6 +25,7 @@ void simpleplane::sort()
                 std::swap(v[j], v[j + 1]);
                 std::swap(vt[j], vt[j + 1]);
                 std::swap(vn[j], vn[j + 1]);
+                std::swap(vertexnormal[j], vertexnormal[j + 1]);
             }
 }
 
@@ -69,5 +70,4 @@ void simpleplane::print()
         i.print();
     std::cout << "Centroid:"; centroid.print();
     std::cout << "Centroid Normal:"; centroidNormal.print();
-
 }
