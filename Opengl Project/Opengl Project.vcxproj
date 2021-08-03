@@ -28,7 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mergeSort.cpp" />
     <ClCompile Include="rasterizer.cpp" />
     <ClCompile Include="simpleplane.cpp" />
   </ItemGroup>

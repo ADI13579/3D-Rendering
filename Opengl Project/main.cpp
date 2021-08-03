@@ -2,7 +2,7 @@
 #include"parser.h"
 #include"Basic.h"
 #include"Shader.h"
-#include"mergesort.cpp"
+#include<thread>
 
 //-z is out of the screen +z is inside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -23,8 +23,8 @@ float lastFrame = 0.0f;
 static Shader myshader;
 //camera variable shifted to basic.h
 
-float lastX = SCREEN_WIDTH / 2.0f;
-float lastY = SCREEN_HEIGHT / 2.0f;
+float lastX = SCREEN_WIDTH;
+float lastY = SCREEN_HEIGHT;
 bool firstMouse = true;
 
 void ClearWindow()
@@ -36,29 +36,26 @@ void ClearWindow()
     glPointSize(1);
 }
 
-std::vector<plane_t> backFaceCull(std::vector<plane_t> planes)
+//if the surface is visible find process it through camera and finally sort the selected view
+void backFaceCull_CameraView(std::vector<plane_t> &planes)
 {
+    std::cout << "This is back face" << std::endl;
     std::vector<plane_t> selected;
     for (auto i : planes)
-        if (((mycamera.Front*-1) ^ i.centroidNormal) <= 0)
-            selected.push_back(i);
-    return selected;
+    {
+        if (((mycamera.Front * -1) ^ i.centroidNormal) <= 0)
+            selected.push_back(myshader.getShadedPlane(i));
+    }
+    sort(selected);//depth sort
+    planes.clear();
+    planes.insert(planes.begin(),selected.begin(), selected.end());
 }
-
-std::vector<plane_t> ViewFromCamera(std::vector<plane_t> planes)
-{
-    std::vector<plane_t> cameraView;
-    for (auto i : planes)
-        cameraView.push_back(myshader.getShadedPlane(i));
-    return cameraView;
-}
-
 
 int main()
 {
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<plane_t> planes=parser::parse("Cube");
-    sort(planes);
+    
     for (int i = 0; i < planes.size(); i++)
         planes[i].translate(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000));
     
@@ -82,7 +79,6 @@ int main()
     int screenHeight = SCREEN_HEIGHT;
     glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
 
-
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
     glMatrixMode(GL_PROJECTION);
@@ -90,18 +86,32 @@ int main()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnableClientState(GL_VERTEX_ARRAY);
-    
 
+    std::vector<plane_t> set1(planes.begin(), planes.begin() + planes.size() / 2);
+    std::vector<plane_t> set2(planes.begin() + planes.size() / 2, planes.end());
+    
+    std::vector<plane_t> part1(set1.size());
+    std::vector<plane_t> part2(set2.size());
+    std::vector<plane_t> processed(planes.size());
+    
     while (!glfwWindowShouldClose(window))
     {
+        part1.clear();
+        part1.resize(set1.size());
+        part1 = set1;
 
+        part2.clear();
+        part2.resize(set2.size());
+        part2 = set2;
+
+        processed.clear();
+        processed.resize(planes.size());
 
         ClearWindow();
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
-        std::cout << "FPS:" << 1 / deltaTime << std::endl;
         lastFrame = currentFrame;
 
         // set the projection matrix;
@@ -117,23 +127,18 @@ int main()
         float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         
-        //let this be as a function to make easy to work
-        //later sorting is necessary for knowing which surface lies behind or front(image processing type)
-        //however below two functions can be combined later to make it efficient
-        //enable this for camera view
+        std::thread(backFaceCull_CameraView, std::ref(part1)).join();
+        std::thread(backFaceCull_CameraView, std::ref(part2)).join();
+        merge(part1, part2, processed);
 
-
-        //to be done divide planes into two parts then procees the following two portions in two threads
-        std::vector<plane_t> selectedPlane = backFaceCull(planes);
-        std::vector<plane_t> view = ViewFromCamera(selectedPlane);
-  
-       // sort(view);
-        for (auto i : view)
+        for (auto i : processed)
             i.draw(0);
- 
+        
         glPopMatrix();
         glfwSwapBuffers(window);
         glfwPollEvents();
+        std::cout << "FPS:" << 1 / (glfwGetTime()- currentFrame) << std::endl;
+
     }
 
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -150,24 +155,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     {
         switch (key)
         {
-            case GLFW_KEY_M:
-                
-            break;
-            case GLFW_KEY_T:
-                
-            break;
-
-
+        
             case GLFW_KEY_A:
-                //worldprops::camera.x -= 10;
-                std::cout << "deltatime"<<deltaTime;
-                mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
-                break;
+                    std::cout << "deltatime"<<deltaTime;
+                    mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
+                    break;
             case GLFW_KEY_D:
-                //worldprops::camera.x += 10;
-                mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
-                break;
-
+                    mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
+                    break;
         }
     }
 }
