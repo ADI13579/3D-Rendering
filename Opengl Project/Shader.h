@@ -115,7 +115,7 @@ public:
 
 				//show_matrix(viewMat);
 				float resView[4][1];
-		
+				//show_matrix(viewMat);
 			matMulVec(viewMat, resModel, resView);
 
 
@@ -124,7 +124,7 @@ public:
 		// multiply with projection matrix 
 
 			float resProj[4][1];
-			matMulVec(projectionMat, resModel, resProj);
+			matMulVec(projectionMat, resView, resProj);
 
 
 
@@ -149,6 +149,8 @@ public:
 		v0 = getShadedCoordinate(plane.v[0]);
 		v1 = getShadedCoordinate(plane.v[1]);
 		v2 = getShadedCoordinate(plane.v[2]);
+
+		//std::cout << "oldVO" << plane.v[0].x << "  new v0" << v0.x;
 		plane.v[0] = v0;
 		plane.v[1] = v1;
 		plane.v[2] = v2;
@@ -157,4 +159,20 @@ public:
 		return plane;
 
 	}
+
+
+	void show_matrix(float mat[4][4]) {
+		// show matrix
+
+
+		std::cout << "Result matrix is \n";
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++)
+				std::cout << mat[i][j] << " ";
+			std::cout << "\n";
+		}
+
+	}
+
+
 };

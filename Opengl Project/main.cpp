@@ -109,7 +109,7 @@ int main()
         myshader.setMat("projection", projMat);
 
         // set the view matrix
-        float viewMat[4][4];
+        float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
 
@@ -156,6 +156,18 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             case GLFW_KEY_T:
                 
             break;
+
+
+            case GLFW_KEY_A:
+                //worldprops::camera.x -= 10;
+                std::cout << "deltatime"<<deltaTime;
+                mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
+                break;
+            case GLFW_KEY_D:
+                //worldprops::camera.x += 10;
+                mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
+                break;
+
         }
     }
 }

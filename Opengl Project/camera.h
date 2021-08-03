@@ -70,12 +70,12 @@ public:
         //std::cout <<"x:" << eye.x <<"y:" << eye.y <<"z:"<< eye.z;
         // compute the forward vector from target to eye
         coordinate3f forward = eye - target;
-        //forward = !forward;                 // make unit length
+        forward = !forward;                 // make unit length
         //std::cout << "x:" << forward.x << "y:" << forward.y << "z:" << forward.z;
 
         // compute the left vector
         coordinate3f left = upDir*forward; // cross product
-        //left = !left; // make left normalized
+        left = !left; // make left normalized
         //std::cout << "x:" << left.x << "y:" << left.y << "z:" << left.z;
 
         // recompute the orthonormal up vector
