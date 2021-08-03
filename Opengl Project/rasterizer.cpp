@@ -93,6 +93,11 @@ void plane_t::draw(bool MESH)
      calculateIntensities();
      for (int y = t[0].y; y <=t[2].y; y++)
      {
+         if (y > SCREEN_HEIGHT)
+             break;
+         if (y < 0)
+             y = 0;
+
          coordinate2i temp(0,y);
          std::vector<float> point={
                       GetIntersectPoint(t[0], t[1], y),

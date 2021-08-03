@@ -44,7 +44,10 @@ void backFaceCull_CameraView(std::vector<plane_t> &planes)
     for (auto i : planes)
     {
         if (((mycamera.Front * -1) ^ i.centroidNormal) <= 0)
+        {
+            i.calculateIntensities();//as camera changes specular reflection intensity changes
             selected.push_back(myshader.getShadedPlane(i));
+        }
     }
     sort(selected);//depth sort
     planes.clear();
