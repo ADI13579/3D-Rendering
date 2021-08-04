@@ -34,6 +34,10 @@ public:
     void draw(bool);
     void calculateIntensities();
     void print();
+    void calculateCentroid()
+    {
+        centroid = (v[0] + v[1] + v[2])/3;
+    };
 
 };
 //merge sort is implemented to sort the output after backface culling

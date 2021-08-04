@@ -84,13 +84,12 @@ void plane_t::draw(bool MESH)
     if (div == 0)
         return;
 
-    //calculateIntensities(); since the point light will be fixed so this is done in constructor
     std::vector<coordinate2i> t = {
                                     coordinate2i(v[0].x,v[0].y),
                                     coordinate2i(v[1].x,v[1].y),
                                     coordinate2i(v[2].x,v[2].y),
     };
-     calculateIntensities();
+
      for (int y = t[0].y; y <=t[2].y; y++)
      {
          if (y > SCREEN_HEIGHT)
@@ -106,13 +105,14 @@ void plane_t::draw(bool MESH)
          };
          
          std::sort(point.begin(), point.end());
-        
+         
          if (point[2] == INT_MAX)
              point.pop_back();
          //part for clippig points that lies outside
          //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
          if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
          {
+             calculateIntensities();
              if (point[0] < 0)
                  point[0] = 0;
              if (point[1] > SCREEN_WIDTH)
@@ -120,12 +120,13 @@ void plane_t::draw(bool MESH)
 
              for (int x = point[0]; x <= point[1]; x++)
              {
+                 
                  float W0, W1, W2;
 
                  W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
                  W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
                  W2 = 1.0 - W0 - W1;
-
+                 
                  coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
                  temp.x = x;
                  putpixel(temp, color);

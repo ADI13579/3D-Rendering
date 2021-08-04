@@ -39,14 +39,15 @@ void ClearWindow()
 //if the surface is visible find process it through camera and finally sort the selected view
 void backFaceCull_CameraView(std::vector<plane_t> &planes)
 {
-    std::cout << "This is back face" << std::endl;
     std::vector<plane_t> selected;
     for (auto i : planes)
     {
         if (((mycamera.Front * -1) ^ i.centroidNormal) <= 0)
         {
-            i.calculateIntensities();//as camera changes specular reflection intensity changes
-            selected.push_back(myshader.getShadedPlane(i));
+            //i.calculateIntensities();//as camera changes specular reflection intensity changes
+            i=myshader.getShadedPlane(i);
+            i.calculateCentroid();
+            selected.push_back(i);
         }
     }
     sort(selected);//depth sort
@@ -59,8 +60,7 @@ int main()
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<plane_t> planes=parser::parse("Cube");
     
-    for (int i = 0; i < planes.size(); i++)
-        planes[i].translate(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000));
+
     
     if (!glfwInit())
         return -1;
@@ -99,16 +99,10 @@ int main()
     
     while (!glfwWindowShouldClose(window))
     {
-        part1.clear();
-        part1.resize(set1.size());
-        part1 = set1;
-
-        part2.clear();
-        part2.resize(set2.size());
-        part2 = set2;
 
         processed.clear();
         processed.resize(planes.size());
+        processed = planes;
 
         ClearWindow();
         // per-frame time logic
@@ -130,9 +124,7 @@ int main()
         float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         
-        std::thread(backFaceCull_CameraView, std::ref(part1)).join();
-        std::thread(backFaceCull_CameraView, std::ref(part2)).join();
-        merge(part1, part2, processed);
+        backFaceCull_CameraView(processed);
 
         for (auto i : processed)
             i.draw(0);

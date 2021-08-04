@@ -6,7 +6,7 @@
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
 static coordinate3f pointlight(0,0, -1000);
-static Camera mycamera(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0));
+static Camera mycamera(coordinate3f(0,0,0));
 
 //putpixel for coordinate2i
 static void putpixel(coordinate2i pixel, coordinate3f color)

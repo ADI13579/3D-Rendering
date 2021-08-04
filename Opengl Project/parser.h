@@ -232,7 +232,9 @@ namespace parser
                                    textures[sep[1][2]]
                         };
                     }
-                    p.scale(500,ratioyx*500,ratiozx*500);
+                    float fac = SCREEN_WIDTH;
+                    p.scale(500,500,500);
+                    p.translate(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000));
                     p.makeCalculations();
                     planes.push_back(plane_t(p, materialBind));
                 }
