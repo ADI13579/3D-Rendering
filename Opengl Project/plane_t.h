@@ -27,6 +27,7 @@ public:
         centroid = _p.centroid;
         centroidNormal = _p.centroidNormal;
         vertexnormal = _p.vertexnormal;
+        diffuseIntensities(pointlight);
     }
 
     //Gets the x of intersect point return INT_MAX if the line is vertical 
@@ -37,20 +38,17 @@ public:
     {
         simpleplane::makeCalculations();
         //calculate without specular intensity
-        for (int i = 0; i < 3; i++)
+        
+    }
+    void rotate(float alpha)
+    {
+        for (int i=0;i<3;i++)
         {
-            I[i] = kd * 0.3;
-
-            float a = (!vn[i] ^ !(pointlight - v[i]));
-            if (a > 0) I[i] = I[i] + kd * a;
-
-
-            I[i].x = I[i].x > 1 ? 1 : I[i].x;
-            I[i].y = I[i].y > 1 ? 1 : I[i].y;
-            I[i].z = I[i].z > 1 ? 1 : I[i].z;
+            v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
         }
     }
-    void calculateIntensities();
+    void diffuseIntensities(coordinate3f);
+    void specularIntensities();
     void print();
     void calculateCentroid()
     {

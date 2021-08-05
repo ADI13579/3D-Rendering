@@ -29,42 +29,64 @@ bool firstMouse = true;
 
 void ClearWindow()
 {
-    glClearColor(0.58, 0.89, 0.96, 0.50);
+    glClearColor(sky.x, sky.y, sky.z, 0.50);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
     glEnable(GL_POINT_SMOOTH);
     glPointSize(1);
 }
 
+//dont process further if the plane lies completely outside
+bool liesOutside(plane_t plane)
+{
+    //IF THE LOWEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
+    //IF THE LARGEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
+
+    if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
+        return 1;
+    //SIMILAR TO ABOVE
+
+    std::vector<float> X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
+    std::sort(X.begin(), X.end());
+    if (X[0] > SCREEN_WIDTH || X[2] < 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 //if the surface is visible find process it through camera and finally sort the selected view
-void backFaceCull_CameraView(std::vector<plane_t> &planes)
+void backFaceCull_CameraView(std::vector<plane_t>& planes)
 {
     std::vector<plane_t> selected;
     for (auto i : planes)
     {
-        if (((mycamera.Front * -1) ^ i.centroidNormal) <= 0)
+        if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
-            for (int j = 0; j < 3; j++)
-            {
-                float a = !(i.v[j] * 2 - pointlight - mycamera.Position) ^ !i.vn[j];
-                if (a > 0) i.I[j] = i.I[j] + i.ks * (pow(a, i.Ns));
-            }
+            i.diffuseIntensities(pointlight);
+            i.specularIntensities();
             i = myshader.getShadedPlane(i);
-            i.calculateCentroid();
-            i.sort();
-            selected.push_back(i);
+            if (!liesOutside(i))
+            {
+                selected.push_back(i);
+            }
         }
     }
+
+    //std::cout << selected.size() << " Triangles are selected among " << planes.size() << std::endl;
+
     sort(selected);//depth sort
     planes.clear();
-    planes.insert(planes.begin(),selected.begin(), selected.end());
+    planes.insert(planes.begin(), selected.begin(), selected.end());
 }
+
+const float Setzbuffer[SCREEN_HEIGHT + 1][SCREEN_WIDTH + 1] = { INT_MIN };
 
 int main()
 {
-    GLFWwindow* window; //handle for the main drawable window 
-    std::vector<plane_t> planes=parser::parse("Cube");
-    
+    GLFWwindow* window;//handle for the main drawable window 
+    std::vector<plane_t> planes = parser::parse("Cube");
+    sort(planes);
     if (!glfwInit())
         return -1;
 
@@ -96,14 +118,15 @@ int main()
 
     std::vector<plane_t> set1(planes.begin(), planes.begin() + planes.size() / 2);
     std::vector<plane_t> set2(planes.begin() + planes.size() / 2, planes.end());
-    
+
     std::vector<plane_t> part1(set1.size());
     std::vector<plane_t> part2(set2.size());
     std::vector<plane_t> processed(planes.size());
-    
+    int angle = 0;
+
     while (!glfwWindowShouldClose(window))
     {
-
+        std::memcpy(Zbuffer, Setzbuffer, sizeof(Zbuffer));
         processed.clear();
         processed.resize(planes.size());
         processed = planes;
@@ -116,29 +139,34 @@ int main()
         lastFrame = currentFrame;
 
         // set the projection matrix;
-        float projMat[4][4] ={ {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} };
+        float projMat[4][4] = { {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} };
         mycamera.GetPerspectiveMatrix(radian(45), 1, 0.1, 100, projMat);
         myshader.setMat("projection", projMat);
-        show_matrix(projMat);
+        //show_matrix(projMat);
 
+
+        // set the model matrix
+        float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
+        myshader.setMat("model", modelMat);
         // set the view matrix
         float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
 
-        // set the model matrix
-        float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
-        myshader.setMat("model", modelMat);
-        
         backFaceCull_CameraView(processed);
 
         for (auto i : processed)
+        {
             i.draw(0);
-        
+        }
+
         glPopMatrix();
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "FPS:" << 1 / (glfwGetTime()- currentFrame) << std::endl;
+        std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
+
+        angle++;
+        angle = angle % 360;
 
     }
 
@@ -156,14 +184,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     {
         switch (key)
         {
-        
-            case GLFW_KEY_A:
-                    std::cout << "deltatime"<<deltaTime;
-                    mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
-                    break;
-            case GLFW_KEY_D:
-                    mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
-                    break;
+
+        case GLFW_KEY_A:
+            std::cout << "deltatime" << deltaTime;
+            mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
+            break;
+        case GLFW_KEY_D:
+            mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
+            break;
         }
     }
 }
@@ -204,7 +232,7 @@ void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<
 
     while (j < nL && k < nR)
     {
-        if (left[j].centroid.z > right[k].centroid.z) {
+        if (left[j].centroid.z < right[k].centroid.z) {
             bars[i] = left[j];
             j++;
         }

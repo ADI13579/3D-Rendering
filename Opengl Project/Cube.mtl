@@ -1,37 +1,12 @@
-# Blender MTL File: 'None'
-# Material Count: 3
+# Blender MTL File: '6770d696c86242f889b17cfda0ab0e4f.blend'
+# Material Count: 1
 
-newmtl Material.001
-Ns 143.999983
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Bump C:\\Users\\adith\\Desktop\\object\\textures\\Material_normal.png
-map_Kd C:\\Users\\adith\\Desktop\\object\\textures\\Material_baseColor.jpg
-
-newmtl Material.002
-Ns 143.999983
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Bump C:\\Users\\adith\\Desktop\\object\\textures\\Material.002_normal.png
-map_Kd C:\\Users\\adith\\Desktop\\object\\textures\\Material.002_baseColor.jpg
-
-newmtl Material.003
+newmtl Material
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
+Kd 0.048514 0.800000 0.197537
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\adith\\Desktop\\object\\textures\\Material.003_baseColor.jpg

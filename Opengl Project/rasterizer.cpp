@@ -1,12 +1,24 @@
 #pragma once
 #include"plane_t.h"
 #include"Basic.h"
-#include<algorithm>.h
+#include<algorithm>
 #include"Shader.h"
+void putpixel(coordinate3f pixel, coordinate3f color, float alpha)
+{
+    if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
+        return;
 
-extern Shader myshader;
+    if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
+        return;
+    
+ 
+        Zbuffer[int(pixel.x)][int(pixel.y)] = pixel.z;
+        glColor3f(color.x, color.y, color.z);
+        glVertexPointer(2, GL_FLOAT, 0, &pixel.x);
+        glDrawArrays(GL_POINTS, 0, 1);
+};
 
-void plane_t::calculateIntensities()
+void plane_t::diffuseIntensities(coordinate3f pointlight)
 {
     /*
          H = unitvec(L + V)
@@ -16,10 +28,36 @@ void plane_t::calculateIntensities()
             = ka Ia + kd Il(N · L) + ks Il(N · H)^ns
     */
     //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
-    
+    for (int i = 0; i < 3; i++)
+    {
+       I[i] = kd * 0.3;
 
+        float a = (!vn[i] ^ !(pointlight - v[i]));
+        if (a > 0) I[i] = I[i] + kd * a;
+
+    }
+}void plane_t::specularIntensities()
+{
+    /*
+         H = unitvec(L + V)
+                    L=point to light
+                    V=point to camera;
+        I = Idiff + Ispec
+            = ka Ia + kd Il(N · L) + ks Il(N · H)^ns
+    */
+    //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
+    for (int i = 0; i < 3; i++)
+    {
+        float a = !(v[i] * 2 - pointlight - mycamera.Position) ^ !vn[i];
+        if (a > 0) I[i] = I[i] + ks * (pow(a, Ns));
+
+        I[i].x = I[i].x > 1 ? 1 : I[i].x;
+        I[i].y = I[i].y > 1 ? 1 : I[i].y;
+        I[i].z = I[i].z > 1 ? 1 : I[i].z;
+    }
 
 }
+
 
 void plane_t::print()
 {
@@ -59,15 +97,7 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
 //RASTERIZING PART
 void plane_t::draw(bool MESH)
 {
-    //part for clippig points that lies outside horizontally
-    std::vector<float> X = { v[0].x,v[1].x,v[2].x };
-    std::sort(X.begin(), X.end());
-    
-    if (X[0] > SCREEN_WIDTH || X[2] < 0)
-        return;
-    else if(v[0].y > SCREEN_HEIGHT || v[2].y < 0)
-        return;
-    
+
     //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
     float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
     if (div == 0)
@@ -86,17 +116,17 @@ void plane_t::draw(bool MESH)
          if (y < 0)
              y = 0;
 
-         coordinate2i temp(0,y);
+         coordinate3f temp(0,y);
          std::vector<float> point={
                       GetIntersectPoint(t[0], t[1], y),
                       GetIntersectPoint(t[1], t[2], y),
                       GetIntersectPoint(t[2], t[0], y),
          };
          
-         std::sort(point.begin(), point.end());
-         
+         std::sort(point.begin(), point.end()); 
          if (point[2] == INT_MAX)
              point.pop_back();
+
          //part for clippig points that lies outside
          //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
          if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
@@ -112,12 +142,12 @@ void plane_t::draw(bool MESH)
                  float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
                  float W2 = 1.0 - W0 - W1;
                  
-                 if (W0 > 0 && W1 > 0 && W2 > 0)
-                 {
-                     coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-                     temp.x = x;
-                     putpixel(temp, color, d);
-                 }
+                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+                 temp.x = x;
+                 temp.z = W0 * v[0].z + W1 * v[1].z + W2 * v[2].z;
+
+                  putpixel(temp, color, d);
+                 
              }
          }
      }

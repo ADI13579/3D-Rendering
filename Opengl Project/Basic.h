@@ -5,8 +5,10 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
-static coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT, 10000);
+static coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,500);
 static Camera mycamera(coordinate3f(0,0,0));
+static coordinate3f sky(0.58, 0.89, 0.96);
+static float Zbuffer[SCREEN_HEIGHT + 1][SCREEN_WIDTH + 1] = { INT_MIN };
 
 //putpixel for coordinate2i
 static void putpixel(coordinate2i pixel, coordinate3f color)
@@ -15,13 +17,10 @@ static void putpixel(coordinate2i pixel, coordinate3f color)
     glVertexPointer(2, GL_INT, 0, &pixel.x);
     glDrawArrays(GL_POINTS, 0, 1);
 };
-
-static void putpixel(coordinate2i pixel, coordinate3f color,float alpha)
+static void debug()
 {
-    glColor4f(color.x,color.y,color.z,alpha);
-    glVertexPointer(2, GL_INT, 0, &pixel.x);
-    glDrawArrays(GL_POINTS, 0, 1);
-};
+    std::cout << "Why Wrong"<<std::endl;
+}
 
 static void putpixel(std::vector<coordinate2i> pixel, coordinate3f color)
 {
@@ -32,8 +31,9 @@ static void putpixel(std::vector<coordinate2i> pixel, coordinate3f color)
 
 static void putpixel(coordinate3f pixel, coordinate3f color)
 {
+    GLfloat a[] = { pixel.x,pixel.y,pixel.z };
     glColor3f(color.x, color.y, color.z);
-    glVertexPointer(3, GL_FLOAT, 0, &pixel.x);
+    glVertexPointer(3, GL_FLOAT, 0, &a);
     glDrawArrays(GL_POINTS, 0, 1);
 };
 

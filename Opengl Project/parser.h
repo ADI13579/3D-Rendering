@@ -121,9 +121,7 @@ namespace parser
             std::sort(normalizev[0].begin(), normalizev[0].end());
             std::sort(normalizev[1].begin(), normalizev[1].end());
             std::sort(normalizev[2].begin(), normalizev[2].end());
-            std::cout << "Using back" << normalizev[0].back();
-            std::cout << "Without Using back" << normalizev[0][normalizev[0].size()-1];
-
+            
             coordinate3f scale(
                 normalizev[0].back() - normalizev[0].front(),
                 normalizev[1].back() - normalizev[1].front(),
@@ -236,9 +234,10 @@ namespace parser
                                    textures[sep[1][2]]
                         };
                     }
-                    float fac = 100;
+
+                    float fac = 300;
                     p.scale(fac,ratioyx*fac,fac*ratiozx);
-                    p.translate(coordinate3f(SCREEN_WIDTH / 2, 0, -500));
+                    p.translate(coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -500));
                     plane_t t(p, materialBind);
                     t.makeCalculations();
                     planes.push_back(t);

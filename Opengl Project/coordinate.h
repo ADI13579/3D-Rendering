@@ -78,7 +78,6 @@ public:
             };
             temp = coordinate3f(R[0] ^ temp, R[1] ^ temp, R[2] ^ temp);
         }
-
         else if (_y)
         {
             coordinate3f R[3] = {

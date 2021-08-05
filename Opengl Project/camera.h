@@ -1,7 +1,6 @@
 #pragma once
 #include"coordinate.h"
 #include <vector>
-#include"Basic.h"
 
 /// <summary>
 /// ////////////////////DEBUGGING//////////////////
@@ -166,7 +165,7 @@ public:
         persMat[2][3] = -(2 * far * near) / (far - near);
 
         //persMat = mat;
-        show_matrix(persMat);
+        //show_matrix(persMat);
 
 
     }
