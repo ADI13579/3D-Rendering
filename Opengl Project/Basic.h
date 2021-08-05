@@ -85,3 +85,22 @@ static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
     }
     putpixel(Breshenham_Points, color);
 }
+
+
+static float radian(float degree) {
+    return PI / 180 * degree;
+}
+
+
+//static void show_matrix(float mat[4][4]) {
+//	// show matrix
+//
+//			
+//			std::cout << "Result matrix is \n";
+//			for (int i = 0; i < 4; i++) {
+//				for (int j = 0; j < 4; j++)
+//					std::cout << mat[i][j] << " ";
+//				std::cout << "\n";
+//			}
+//			
+//}

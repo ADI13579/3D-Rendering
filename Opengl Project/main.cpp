@@ -116,8 +116,10 @@ int main()
         lastFrame = currentFrame;
 
         // set the projection matrix;
-        float projMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+        float projMat[4][4] ={ {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} };
+        mycamera.GetPerspectiveMatrix(radian(45), 1, 0.1, 100, projMat);
         myshader.setMat("projection", projMat);
+        show_matrix(projMat);
 
         // set the view matrix
         float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
@@ -125,7 +127,7 @@ int main()
         myshader.setMat("view", viewMat);
 
         // set the model matrix
-        float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+        float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         
         backFaceCull_CameraView(processed);

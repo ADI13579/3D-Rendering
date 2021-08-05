@@ -150,7 +150,7 @@ public:
 		v1 = getShadedCoordinate(plane.v[1]);
 		v2 = getShadedCoordinate(plane.v[2]);
 
-		//std::cout << "oldVO" << plane.v[0].x << "  new v0" << v0.x;
+		std::cout << "oldVO" << plane.v[0].x << "new v0" << v0.x << std::endl;
 		plane.v[0] = v0;
 		plane.v[1] = v1;
 		plane.v[2] = v2;

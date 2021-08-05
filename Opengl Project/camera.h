@@ -1,7 +1,26 @@
 #pragma once
 #include"coordinate.h"
 #include <vector>
-void show_matrix(float mat[4][4]);
+#include"Basic.h"
+
+/// <summary>
+/// ////////////////////DEBUGGING//////////////////
+/// </summary>
+/// <param name="mat"></param>
+
+static void show_matrix(float mat[4][4]) {
+    // show matrix
+
+
+    std::cout << "Result matrix is \n";
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++)
+            std::cout << mat[i][j] << " ";
+        std::cout << "\n";
+    }
+
+}
+///////////////////////////////////////////////////
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
@@ -134,6 +153,26 @@ public:
 
         lookAt(Position, (Position + Front), Up, lookAtMatrix);
     }
+    
+    void GetPerspectiveMatrix(float angle, float ratio, float near, float far, float persMat[4][4]) {
+
+        // GetPerspectiveMatrix(fov, aspectRatio, nearplane, farplane, perspectiveMatrix
+        //persMat[4][4] = { {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} };
+        float tan_half_angle = tan(angle / 2);
+        persMat[0][0] = 1 / (ratio * tan_half_angle);
+        persMat[1][1] = 1 / (tan_half_angle);
+        persMat[2][2] = -(far + near) / (far - near);
+        persMat[3][2] = -1;
+        persMat[2][3] = -(2 * far * near) / (far - near);
+
+        //persMat = mat;
+        show_matrix(persMat);
+
+
+    }
+
+
+
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
