@@ -121,21 +121,25 @@ namespace parser
             std::sort(normalizev[0].begin(), normalizev[0].end());
             std::sort(normalizev[1].begin(), normalizev[1].end());
             std::sort(normalizev[2].begin(), normalizev[2].end());
+            std::cout << "Using back" << normalizev[0].back();
+            std::cout << "Without Using back" << normalizev[0][normalizev[0].size()-1];
+
             coordinate3f scale(
                 normalizev[0].back() - normalizev[0].front(),
                 normalizev[1].back() - normalizev[1].front(),
                 normalizev[2].back() - normalizev[2].front()
             );
-            normalizev[0].clear();
-            normalizev[1].clear();
-            normalizev[2].clear();            
-            scale = coordinate3f(1 / scale.x, 1 / scale.y, 1 / scale.z);
-            
-            float ratioyx = scale.y / scale.x;
-            float ratiozx = scale.z / scale.x;
-
+            scale = coordinate3f(1/scale.x, 1/scale.y, 1/scale.y);
+            //translate (x,y,z) by (-xmin,-ymin,zmin)
             for (int i = 0; i < vertexes.size(); i++)
-                vertexes[i] = vertexes[i].scaling(scale.x, scale.y, scale.z);
+            {
+                vertexes[i] = vertexes[i] + coordinate3f(-normalizev[0][0], -normalizev[1][0], normalizev[2][0]);
+                vertexes[i] = vertexes[i].scaling(scale.x,scale.y,scale.z);
+            }
+
+            
+            float ratioyx = scale.x/scale.y;
+            float ratiozx = scale.x / scale.z;
 
             std::fstream mtl(filename + ".mtl", std::ios::in);
             for (auto i : materialids)
@@ -190,7 +194,7 @@ namespace parser
                 mtl.seekg(0);
             }
             mtl.close();
-
+            
             int k = 0;
             material materialBind;
             obj = std::fstream(filename + ".obj", std::ios::in);
@@ -232,13 +236,16 @@ namespace parser
                                    textures[sep[1][2]]
                         };
                     }
-                    float fac = SCREEN_WIDTH;
-                    p.scale(500,500,500);
-                    p.translate(coordinate3f(SCREEN_WIDTH / 2, SCREEN_HEIGHT/2, -1000));
-                    p.makeCalculations();
-                    planes.push_back(plane_t(p, materialBind));
+                    float fac = 100;
+                    p.scale(fac,ratioyx*fac,fac*ratiozx);
+                    p.translate(coordinate3f(SCREEN_WIDTH / 2, 0, -500));
+                    plane_t t(p, materialBind);
+                    t.makeCalculations();
+                    planes.push_back(t);
                 }
             }
+
+            std::cout << "Triangles Recorded" << planes.size()<<std::endl;
             return planes;
         }
 };

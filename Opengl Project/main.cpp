@@ -44,9 +44,14 @@ void backFaceCull_CameraView(std::vector<plane_t> &planes)
     {
         if (((mycamera.Front * -1) ^ i.centroidNormal) <= 0)
         {
-            //i.calculateIntensities();//as camera changes specular reflection intensity changes
-            i=myshader.getShadedPlane(i);
+            for (int j = 0; j < 3; j++)
+            {
+                float a = !(i.v[j] * 2 - pointlight - mycamera.Position) ^ !i.vn[j];
+                if (a > 0) i.I[j] = i.I[j] + i.ks * (pow(a, i.Ns));
+            }
+            i = myshader.getShadedPlane(i);
             i.calculateCentroid();
+            i.sort();
             selected.push_back(i);
         }
     }
@@ -59,8 +64,6 @@ int main()
 {
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<plane_t> planes=parser::parse("Cube");
-    
-
     
     if (!glfwInit())
         return -1;
@@ -89,6 +92,7 @@ int main()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnable(GL_BLEND);
 
     std::vector<plane_t> set1(planes.begin(), planes.begin() + planes.size() / 2);
     std::vector<plane_t> set2(planes.begin() + planes.size() / 2, planes.end());

@@ -5,13 +5,20 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
-static coordinate3f pointlight(0,0, -1000);
+static coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT, 10000);
 static Camera mycamera(coordinate3f(0,0,0));
 
 //putpixel for coordinate2i
 static void putpixel(coordinate2i pixel, coordinate3f color)
 {
     glColor3fv(&color.x);
+    glVertexPointer(2, GL_INT, 0, &pixel.x);
+    glDrawArrays(GL_POINTS, 0, 1);
+};
+
+static void putpixel(coordinate2i pixel, coordinate3f color,float alpha)
+{
+    glColor4f(color.x,color.y,color.z,alpha);
     glVertexPointer(2, GL_INT, 0, &pixel.x);
     glDrawArrays(GL_POINTS, 0, 1);
 };

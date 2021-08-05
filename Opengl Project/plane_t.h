@@ -1,6 +1,7 @@
 #pragma once
 #include"simpleplane.h"
 #include"material.h"
+#include"Basic.h"
 
 class plane_t :public simpleplane, public material
 {
@@ -32,6 +33,23 @@ public:
     //code in rasterize.h
     float GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
     void draw(bool);
+    void makeCalculations()
+    {
+        simpleplane::makeCalculations();
+        //calculate without specular intensity
+        for (int i = 0; i < 3; i++)
+        {
+            I[i] = kd * 0.3;
+
+            float a = (!vn[i] ^ !(pointlight - v[i]));
+            if (a > 0) I[i] = I[i] + kd * a;
+
+
+            I[i].x = I[i].x > 1 ? 1 : I[i].x;
+            I[i].y = I[i].y > 1 ? 1 : I[i].y;
+            I[i].z = I[i].z > 1 ? 1 : I[i].z;
+        }
+    }
     void calculateIntensities();
     void print();
     void calculateCentroid()

@@ -16,20 +16,9 @@ void plane_t::calculateIntensities()
             = ka Ia + kd Il(N · L) + ks Il(N · H)^ns
     */
     //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
-    for (int i = 0; i < 3; i++)
-    {
-        I[i] = kd*0.3;
- 
-        float a = (!vn[i] ^ !(pointlight - v[i]));
-        if(a>0) I[i] =I[i]+ kd*a;
+    
 
-        a = !(v[i] * 2 - pointlight - mycamera.Position) ^ !vn[i];
-        if (a > 0) I[i] =I[i]+ks * (pow(a, Ns));
 
-        I[i].x = I[i].x> 1 ? 1 : I[i].x;
-        I[i].y = I[i].y> 1 ? 1 : I[i].y;
-        I[i].z = I[i].z> 1 ? 1 : I[i].z;    
-    }
 }
 
 void plane_t::print()
@@ -112,7 +101,6 @@ void plane_t::draw(bool MESH)
          //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
          if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
          {
-             calculateIntensities();
              if (point[0] < 0)
                  point[0] = 0;
              if (point[1] > SCREEN_WIDTH)
@@ -120,16 +108,16 @@ void plane_t::draw(bool MESH)
 
              for (int x = point[0]; x <= point[1]; x++)
              {
+                 float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
+                 float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
+                 float W2 = 1.0 - W0 - W1;
                  
-                 float W0, W1, W2;
-
-                 W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
-                 W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
-                 W2 = 1.0 - W0 - W1;
-                 
-                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-                 temp.x = x;
-                 putpixel(temp, color);
+                 if (W0 > 0 && W1 > 0 && W2 > 0)
+                 {
+                     coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+                     temp.x = x;
+                     putpixel(temp, color, d);
+                 }
              }
          }
      }
