@@ -40,11 +40,14 @@ public:
         //calculate without specular intensity
         
     }
+
     void rotate(float alpha)
     {
         for (int i=0;i<3;i++)
         {
-            v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            //v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            v[i]=v[i].rotation(alpha, 1, 0, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            //v[i]=v[i].rotation(alpha, 0, 0, 1, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
         }
     }
     void diffuseIntensities(coordinate3f);

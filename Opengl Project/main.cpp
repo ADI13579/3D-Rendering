@@ -63,9 +63,10 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
     {
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
-            i.diffuseIntensities(pointlight);
-            i.specularIntensities();
+           
             i = myshader.getShadedPlane(i);
+            i.diffuseIntensities(myshader.getShadedCoordinate(pointlight*-1));
+            i.specularIntensities();
             if (!liesOutside(i))
             {
                 selected.push_back(i);
