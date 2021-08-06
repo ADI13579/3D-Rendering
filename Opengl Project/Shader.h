@@ -35,6 +35,7 @@ class Shader {
 	float viewMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float projectionMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float modelView[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+	float normalModelView[4][4];
 public:
 	Shader() {
 
@@ -92,6 +93,15 @@ public:
 			memcpy(viewMat, Mat, 4 * 4 * sizeof(float));
 
 			matMulMat(viewMat, modelMat, modelView);
+			//show_matrix(viewMat);
+			//show_matrix(modelMat);
+			//show_matrix(modelView);
+			float invrs[4][4];
+			inverse(modelView, invrs);
+			//std::cout << "inverse" << std::endl;
+			//show_matrix(invrs);
+			// transpose
+			transpose(invrs, normalModelView);
 		}
 		else if (name == "projection") {
 			memcpy(projectionMat, Mat, 4 * 4 * sizeof(float));
@@ -169,14 +179,16 @@ public:
 				normalVector[3][0] = 1;
 
 
-				float newModelView[4][4];
+				//float newModelView[4][4];
 				// get the inverse and transpose of modelView --->newModelView
-				float invrs[4][4];
-				inverse(modelView, invrs);
-				float trnspse[4][4];
-				transpose(invrs, trnspse);
+				//float invrs[4][4];
+				//inverse(modelView, invrs);
+				//show_matrix(modelView);
+				//show_matrix(invrs);
+				//float trnspse[4][4];
+				//transpose(invrs, trnspse);
 				//can be somehow optimised here;
-				memcpy(newModelView, trnspse, 4 * 4 * sizeof(float));
+				//memcpy(newModelView, trnspse, 4 * 4 * sizeof(float));
 				// remove the translation  part 
 				//newModelView[0][3] = 0;
 				//newModelView[1][3] = 0;
@@ -187,7 +199,7 @@ public:
 				float newNormalVector[4][1];
 				//  modelView * normalVector = newNormalvector
 
-				matMulVec(newModelView, normalVector, newNormalVector);
+				matMulVec(normalModelView, normalVector, newNormalVector);
 				// newNormalVector  ----- > coordinate 3f
 
 

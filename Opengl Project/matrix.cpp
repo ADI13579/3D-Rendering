@@ -34,9 +34,9 @@ void getCofactor(float A[N][N], float temp[N][N], int p, int q, int n)
 
 /* Recursive function for finding determinant of matrix.
 n is current dimension of A[][]. */
-int determinant(float A[N][N], int n)
+float determinant(float A[N][N], int n)
 {
-	int D = 0; // Initialize result
+	float D = 0; // Initialize result
 
 	// Base case : if matrix contains single element
 	if (n == 1)
@@ -52,11 +52,11 @@ int determinant(float A[N][N], int n)
 		// Getting Cofactor of A[0][f]
 		getCofactor(A, temp, 0, f, n);
 		D += sign * A[0][f] * determinant(temp, n - 1);
-
+		//std::cout << "intermediate D" << D << std::endl;
 		// terms are to be added with alternate sign
 		sign = -sign;
 	}
-
+	//std::cout << "FInal D" << D;
 	return D;
 }
 
@@ -96,7 +96,8 @@ void adjoint(float A[N][N], float adj[N][N])
 bool inverse(float A[N][N], float inverse[N][N])
 {
 	// Find determinant of A[][]
-	int det = determinant(A, N);
+	float det = determinant(A, N);
+	//std::cout << "determinant" << det << std::endl;
 	if (det == 0)
 	{
 		std::cout << "Singular matrix, can't find its inverse";

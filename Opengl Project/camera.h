@@ -113,7 +113,6 @@ public:
         matrix[0][2] = left.z;
         matrix[1][0] = up.x;
         matrix[1][1] = up.y;
-
         matrix[1][2] = up.z;
         matrix[2][0] = forward.x;
         matrix[2][1] = forward.y;
@@ -126,6 +125,11 @@ public:
 
      
         matrix[3][3] = 1;
+
+
+        matrix[3][0] = 0;
+        matrix[3][1] = 0;
+        matrix[3][2] = 0;
 
 
 

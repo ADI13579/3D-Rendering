@@ -149,7 +149,7 @@ int main()
         float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         // set the view matrix
-        float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
+        float viewMat[4][4]= { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
 
