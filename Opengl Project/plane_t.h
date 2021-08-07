@@ -26,14 +26,13 @@ public:
         vn = _p.vn;
         centroid = _p.centroid;
         centroidNormal = _p.centroidNormal;
-        vertexnormal = _p.vertexnormal;
         diffuseIntensities(pointlight);
     }
 
     //Gets the x of intersect point return INT_MAX if the line is vertical 
     //code in rasterize.h
     float GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
-    void draw(bool);
+    void draw(bool,std::vector<std::vector<int>> &Zbuffer);
     void makeCalculations()
     {
         simpleplane::makeCalculations();
@@ -47,7 +46,6 @@ public:
                     std::swap(v[j], v[j + 1]);
                     std::swap(vt[j], vt[j + 1]);
                     std::swap(vn[j], vn[j + 1]);
-                    std::swap(vertexnormal[j], vertexnormal[j + 1]);
                     std::swap(I[j], I[j + 1]);
                 }
     }
@@ -56,9 +54,9 @@ public:
     {
         for (int i=0;i<3;i++)
         {
-            //v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
             v[i]=v[i].rotation(alpha, 1, 0, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
-            //v[i]=v[i].rotation(alpha, 0, 0, 1, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            v[i]=v[i].rotation(alpha, 0, 0, 1, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
         }
     }
     void diffuseIntensities(coordinate3f);

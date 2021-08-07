@@ -41,25 +41,21 @@ bool liesOutside(plane_t plane)
 {
     //IF THE LOWEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     //IF THE LARGEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
-    
-    std::vector<float> X = { plane.v[0].y,plane.v[1].y,plane.v[2].y };
-    std::sort(X.begin(), X.end());
-    if (X[0] > SCREEN_HEIGHT || X[2] < 0)
-    {
+    plane.sort();
+    if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
         return 1;
-    }
+    //SIMILAR TO ABOVE
 
-    X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
+    std::vector<float> X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
     std::sort(X.begin(), X.end());
     if (X[0] > SCREEN_WIDTH || X[2] < 0)
     {
         return 1;
     }
-
     return 0;
 }
 
-//if the surface is visible find process it through camera and finally sort the selected view
+//if the surface is visible find process it through camera and finally draw
 void backFaceCull_CameraView(std::vector<plane_t>& planes)
 {
     std::vector<plane_t> selected;
@@ -67,7 +63,6 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
     {
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
-           
             i.diffuseIntensities(pointlight);
             i.specularIntensities();
             i = myshader.getShadedPlane(i);
@@ -77,10 +72,6 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
             }
         }
     }
-
-    //std::cout << selected.size() << " Triangles are selected among " << planes.size() << std::endl;
-
-    sort(selected);//depth sort
     planes.clear();
     planes.insert(planes.begin(), selected.begin(), selected.end());
 }
@@ -89,7 +80,7 @@ const float Setzbuffer[SCREEN_HEIGHT + 1][SCREEN_WIDTH + 1] = { INT_MIN };
 
 int main()
 {
-    GLFWwindow* window;//handle for the main drawable window 
+    GLFWwindow* window; //handle for the main drawable window 
     std::vector<plane_t> planes = parser::parse("Cube");
     sort(planes);
     if (!glfwInit())
@@ -134,8 +125,7 @@ int main()
         std::memcpy(Zbuffer, Setzbuffer, sizeof(Zbuffer));
         processed.clear();
         processed.resize(planes.size());
-        processed = planes;
-
+        
         ClearWindow();
         // per-frame time logic
         // --------------------
@@ -154,15 +144,26 @@ int main()
         float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         // set the view matrix
-        float viewMat[4][4]= { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+        float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
 
+        processed = planes;
         backFaceCull_CameraView(processed);
+        std::vector<std::vector<int>> Zbuffer(SCREEN_HEIGHT+1,std::vector<int>(SCREEN_WIDTH+1,INT_MIN));
+        
+        /*for (auto i = 0; i < processed.size(); i++)
+        {
+            processed[i].diffuseIntensities(pointlight);
+            processed[i].rotate(angle);
+            processed[i].calculateCentroid();
+            processed[i].specularIntensities();
+        }*/
 
+      
         for (auto i : processed)
         {
-            i.draw(0);
+            i.draw(0,Zbuffer);
         }
 
         glPopMatrix();

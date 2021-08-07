@@ -9,7 +9,6 @@ public:
         v.resize(3);
         vt.resize(3);
         vn.resize(3);
-        vertexnormal.resize(3);
     }
     //To be taken from the .obj file
     //=================================
@@ -19,13 +18,11 @@ public:
     //======================================
     //to be calculated
     //=====================================
-    std::vector<coordinate3f> vertexnormal;
     coordinate3f centroid;
     coordinate3f centroidNormal;
     //=====================================
     void makeCalculations();
     void scale(float x, float y, float z);
     void translate(coordinate3f shiftVector);
-    void calculateNormal();
     void print();
 };

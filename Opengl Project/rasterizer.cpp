@@ -96,9 +96,12 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
 
 //RASTERIZING PART
 //RASTERIZING PART
-void plane_t::draw(bool MESH)
+void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer)
 {
     sort();
+    coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]);
+    float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
+
     //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
     float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
     if (div == 0)
@@ -109,7 +112,7 @@ void plane_t::draw(bool MESH)
                                     coordinate2i(v[1].x,v[1].y),
                                     coordinate2i(v[2].x,v[2].y),
     };
-
+    
     for (int y = t[0].y; y <= t[2].y; y++)
     {
         if (y > SCREEN_HEIGHT)
@@ -139,16 +142,21 @@ void plane_t::draw(bool MESH)
 
             for (int x = point[0]; x <= point[1]; x++)
             {
-                float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
-                float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
-                float W2 = 1.0 - W0 - W1;
-
-                coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
                 temp.x = x;
-                temp.z = W0 * v[0].z + W1 * v[1].z + W2 * v[2].z;
+                temp.z = (D - x * A.x - y * A.y) / A.z;
+                temp.z += (D - (x-1) * A.x - (y+1) * A.y) / A.z;
+                temp.z /= 2;
 
-                putpixel(temp, color, d);
+                if (Zbuffer[x][y] < temp.z)
+                {
+                    Zbuffer[x][y] = temp.z;
+                    float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
+                    float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
+                    float W2 = 1.0 - W0 - W1;
+                    coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
 
+                    putpixel(temp, color, d);
+                }
             }
         }
     }
