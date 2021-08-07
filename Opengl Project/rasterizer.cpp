@@ -95,6 +95,7 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
 }
 
 //RASTERIZING PART
+//RASTERIZING PART
 void plane_t::draw(bool MESH)
 {
     sort();
@@ -109,50 +110,52 @@ void plane_t::draw(bool MESH)
                                     coordinate2i(v[2].x,v[2].y),
     };
 
-     for (int y = t[0].y; y <=t[2].y; y++)
-     {
-         if (y > SCREEN_HEIGHT)
-             break;
-         if (y < 0)
-             y = 0;
+    for (int y = t[0].y; y <= t[2].y; y++)
+    {
+        if (y > SCREEN_HEIGHT)
+            break;
+        if (y < 0)
+            y = 0;
 
-         coordinate3f temp(0,y);
-         std::vector<float> point={
-                      GetIntersectPoint(t[0], t[1], y),
-                      GetIntersectPoint(t[1], t[2], y),
-                      GetIntersectPoint(t[2], t[0], y),
-         };
-         
-         std::sort(point.begin(), point.end()); 
-         if (point[2] == INT_MAX)
-             point.pop_back();
+        coordinate3f temp(0, y);
+        std::vector<float> point = {
+                     GetIntersectPoint(t[0], t[1], y),
+                     GetIntersectPoint(t[1], t[2], y),
+                     GetIntersectPoint(t[2], t[0], y),
+        };
 
-         //part for clippig points that lies outside
-         //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
-         if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
-         {
-             if (point[0] < 0)
-                 point[0] = 0;
-             if (point[1] > SCREEN_WIDTH)
-                 point[1] = SCREEN_WIDTH;
-             for (int x = point[0]; x <= point[1]; x++)
-             {
-                 float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
-                 float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
-                 float W2 = 1.0 - W0 - W1;
+        std::sort(point.begin(), point.end());
+        if (point[2] == INT_MAX)
+            point.pop_back();
 
-                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-                 temp.x = x;
-                 temp.z = W0 * v[0].z + W1 * v[1].z + W2 * v[2].z;
+        //part for clippig points that lies outside
+        //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
+        if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
+        {
+            if (point[0] < 0)
+                point[0] = 0;
+            if (point[1] > SCREEN_WIDTH)
+                point[1] = SCREEN_WIDTH;
 
-                 putpixel(temp, color, d);
-             }
-         }
-     }
-     if (MESH)
-     {
-         Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1));
-         Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1));
-         Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
-     }
+            for (int x = point[0]; x <= point[1]; x++)
+            {
+                float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
+                float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
+                float W2 = 1.0 - W0 - W1;
+
+                coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+                temp.x = x;
+                temp.z = W0 * v[0].z + W1 * v[1].z + W2 * v[2].z;
+
+                putpixel(temp, color, d);
+
+            }
+        }
+    }
+    if (MESH)
+    {
+        Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1));
+        Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1));
+        Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
+    }
 }

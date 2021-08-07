@@ -41,17 +41,21 @@ bool liesOutside(plane_t plane)
 {
     //IF THE LOWEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     //IF THE LARGEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
-
-    if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
+    
+    std::vector<float> X = { plane.v[0].y,plane.v[1].y,plane.v[2].y };
+    std::sort(X.begin(), X.end());
+    if (X[0] > SCREEN_HEIGHT || X[2] < 0)
+    {
         return 1;
-    //SIMILAR TO ABOVE
+    }
 
-    std::vector<float> X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
+    X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
     std::sort(X.begin(), X.end());
     if (X[0] > SCREEN_WIDTH || X[2] < 0)
     {
         return 1;
     }
+
     return 0;
 }
 
@@ -64,9 +68,9 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
            
-            i = myshader.getShadedPlane(i);
-            i.diffuseIntensities(myshader.getShadedCoordinate(pointlight*-1));
+            i.diffuseIntensities(pointlight);
             i.specularIntensities();
+            i = myshader.getShadedPlane(i);
             if (!liesOutside(i))
             {
                 selected.push_back(i);

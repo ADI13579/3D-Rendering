@@ -3,7 +3,6 @@
 //calculates the values requires unaviable from the obj files
 void simpleplane::makeCalculations()
 {
-    sort();
     if (v.empty())
         return;
     calculateNormal();
@@ -15,18 +14,6 @@ void simpleplane::makeCalculations()
 }
 
 //sorts the vertices and their relative properties on the basis of y in ascending order
-void simpleplane::sort()
-{
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3 - 1; j++)
-            if (v[j].y > v[j + 1].y)
-            {
-                std::swap(v[j], v[j + 1]);
-                std::swap(vt[j], vt[j + 1]);
-                std::swap(vn[j], vn[j + 1]);
-                std::swap(vertexnormal[j], vertexnormal[j + 1]);
-            }
-}
 
 //scale the plane
 void simpleplane::scale(float x, float y, float z)

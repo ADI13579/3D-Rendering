@@ -37,8 +37,19 @@ public:
     void makeCalculations()
     {
         simpleplane::makeCalculations();
-        //calculate without specular intensity
-        
+    }
+    void sort()
+    {
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3 - 1; j++)
+                if (v[j].y > v[j + 1].y)
+                {
+                    std::swap(v[j], v[j + 1]);
+                    std::swap(vt[j], vt[j + 1]);
+                    std::swap(vn[j], vn[j + 1]);
+                    std::swap(vertexnormal[j], vertexnormal[j + 1]);
+                    std::swap(I[j], I[j + 1]);
+                }
     }
 
     void rotate(float alpha)

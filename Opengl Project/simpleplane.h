@@ -24,7 +24,6 @@ public:
     coordinate3f centroidNormal;
     //=====================================
     void makeCalculations();
-    void sort();
     void scale(float x, float y, float z);
     void translate(coordinate3f shiftVector);
     void calculateNormal();
