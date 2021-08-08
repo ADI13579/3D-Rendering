@@ -16,16 +16,23 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-// timing
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
 
 static Shader myshader;
 //camera variable shifted to basic.h
 
-float lastX = SCREEN_WIDTH;
-float lastY = SCREEN_HEIGHT;
+
+//camera
 bool firstMouse = true;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = SCREEN_WIDTH / 2.0;
+float lastY = SCREEN_HEIGHT / 2.0;
+float fov = 45.0f;
+
+// timing
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
+
 
 void ClearWindow()
 {
@@ -63,9 +70,10 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
     {
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
-            i.diffuseIntensities(pointlight);
+            i.diffuseIntensities(pointlight*-1);
             i.specularIntensities();
             i = myshader.getShadedPlane(i);
+            //i.diffuseIntensities(myshader.getShadedCoordinate(pointlight * -1));
             if (!liesOutside(i))
             {
                 selected.push_back(i);
@@ -134,8 +142,8 @@ int main()
         lastFrame = currentFrame;
 
         // set the projection matrix;
-        float projMat[4][4] = { {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} };
-        mycamera.GetPerspectiveMatrix(radian(45), 1, 0.1, 100, projMat);
+        float projMat[4][4] = { {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} }; // initialization, contains no meaning at all 
+        mycamera.GetPerspectiveMatrix(radian(mycamera.Zoom), (float)screenWidth / (float)screenHeight, 0.1, 100, projMat);
         myshader.setMat("projection", projMat);
         //show_matrix(projMat);
 

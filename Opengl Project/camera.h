@@ -2,10 +2,7 @@
 #include"coordinate.h"
 #include <vector>
 
-/// <summary>
-/// ////////////////////DEBUGGING//////////////////
-/// </summary>
-/// <param name="mat"></param>
+
 
 static void show_matrix(float mat[4][4]) {
     // show matrix
@@ -223,8 +220,8 @@ public:
         Zoom -= (float)yoffset;
         if (Zoom < 1.0f)
             Zoom = 1.0f;
-        if (Zoom > 45.0f)
-            Zoom = 45.0f;
+        if (Zoom > 90.0f)
+            Zoom = 90.0f;
     }
 
 private:
