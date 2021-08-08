@@ -2,46 +2,29 @@
 #include <vector>
 #include"coordinate.h"
 #include"camera.h"
+
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
-static coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,500);
+static coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
 static Camera mycamera(coordinate3f(0,0,0));
 static coordinate3f sky(0.58, 0.89, 0.96);
-static float Zbuffer[SCREEN_HEIGHT + 1][SCREEN_WIDTH + 1] = { INT_MIN };
+static coordinate3f BLACK;
 
-//putpixel for coordinate2i
-static void putpixel(coordinate2i pixel, coordinate3f color)
+static void putpixel(coordinate3f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)
 {
-    glColor3fv(&color.x);
-    glVertexPointer(2, GL_INT, 0, &pixel.x);
-    glDrawArrays(GL_POINTS, 0, 1);
-};
-static void debug()
-{
-    std::cout << "Why Wrong"<<std::endl;
-}
+    if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
+        return;
 
-static void putpixel(std::vector<coordinate2i> pixel, coordinate3f color)
-{
-    glColor3fv(&color.x);
-    glVertexPointer(2, GL_INT, 0, &pixel[0].x);
-    glDrawArrays(GL_POINTS, 0, pixel.size());
-}
+    if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
+        return;
 
-static void putpixel(coordinate3f pixel, coordinate3f color)
-{
-    GLfloat a[] = { pixel.x,pixel.y,pixel.z };
-    glColor3f(color.x, color.y, color.z);
-    glVertexPointer(3, GL_FLOAT, 0, &a);
-    glDrawArrays(GL_POINTS, 0, 1);
+    pixelbuffer[int(pixel.x)][int(pixel.y)]=color;
 };
 
-static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
+static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color,std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
-    std::vector<coordinate2i> Breshenham_Points;
-
-    coordinate2i temp;
+    coordinate3f temp;
     int x1 = a.x, x2 = b.x;
     int y1 = a.y, y2 = b.y;
     //calculate slope and exchange x and y if the m>1
@@ -69,9 +52,9 @@ static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
     while ((x2 - x1) > 0)
     {
         if (!SWAP)
-            temp = coordinate2f(x1, y1);
+            temp = coordinate3f(x1, y1);
         else
-            temp = coordinate2f(y1, x1);
+            temp = coordinate3f(y1, x1);
 
         if (p < 0)
             p += 2 * dy;
@@ -81,11 +64,9 @@ static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
             y1 += yinc;
         }
         x1 += 1;
-        Breshenham_Points.push_back(temp);
+        putpixel(temp, color,pixelbuffer);
     }
-    putpixel(Breshenham_Points, color);
 }
-
 
 static float radian(float degree) {
     return PI / 180 * degree;

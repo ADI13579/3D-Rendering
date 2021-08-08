@@ -235,9 +235,9 @@ namespace parser
                         };
                     }
 
-                    float fac = 300;
-                    p.scale(fac,ratioyx*fac,fac*ratiozx);
-                    p.translate(coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -500));
+                    float fac = SCREEN_WIDTH/4;
+                    p.scale(fac,ratioyx*fac,ratiozx* fac);
+                    p.translate(coordinate3f(SCREEN_WIDTH/2, 0, -500));
                     plane_t t(p, materialBind);
                     t.makeCalculations();
                     planes.push_back(t);

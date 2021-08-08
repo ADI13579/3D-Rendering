@@ -1,0 +1,9 @@
+﻿C:\Program Files (x86)\visual studio\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(513,5): warning MSB8028: The intermediate directory (All\) contains files shared from another project (gh.vcxproj, ghnataghar.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+G:\ogl project copy\Opengl-Project\Opengl Project\coordinate.h(4,10): fatal error C1083: Cannot open include file: 'GL/glew.h': No such file or directory
+  matrix.cpp
+  rasterizer.cpp
+G:\ogl project copy\Opengl-Project\Opengl Project\coordinate.h(4,10): fatal error C1083: Cannot open include file: 'GL/glew.h': No such file or directory
+  simpleplane.cpp
+G:\ogl project copy\Opengl-Project\Opengl Project\coordinate.h(4,10): fatal error C1083: Cannot open include file: 'GL/glew.h': No such file or directory
+  Generating Code...

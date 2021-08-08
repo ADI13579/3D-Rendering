@@ -9,6 +9,7 @@ public:
     //to be calculated
     //=========================
     coordinate3f I[3];
+    void debug();
     plane_t() {};
     plane_t(simpleplane _p, material _m)
     {
@@ -32,7 +33,7 @@ public:
     //Gets the x of intersect point return INT_MAX if the line is vertical 
     //code in rasterize.h
     float GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
-    void draw(bool,std::vector<std::vector<int>> &Zbuffer);
+    void draw(bool,std::vector<std::vector<int>> &Zbuffer, std::vector<std::vector<coordinate3f>> &pixels);
     void makeCalculations()
     {
         simpleplane::makeCalculations();
@@ -55,12 +56,12 @@ public:
         for (int i=0;i<3;i++)
         {
             v[i]=v[i].rotation(alpha, 0, 1, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
-            v[i]=v[i].rotation(alpha, 1, 0, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
-            v[i]=v[i].rotation(alpha, 0, 0, 1, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            //v[i]=v[i].rotation(alpha, 1, 0, 0, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
+            //v[i]=v[i].rotation(alpha, 0, 0, 1, coordinate3f(SCREEN_WIDTH/2,SCREEN_WIDTH/2,-500));
         }
     }
     void diffuseIntensities(coordinate3f);
-    void specularIntensities();
+    void specularIntensities(coordinate3f camera);
     void print();
     void calculateCentroid()
     {
