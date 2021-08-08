@@ -71,9 +71,8 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
             i.diffuseIntensities(pointlight*-1);
-            i.specularIntensities();
+           i.specularIntensities();
             i = myshader.getShadedPlane(i);
-            //i.diffuseIntensities(myshader.getShadedCoordinate(pointlight * -1));
             if (!liesOutside(i))
             {
                 selected.push_back(i);
@@ -130,7 +129,7 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        std::memcpy(Zbuffer, Setzbuffer, sizeof(Zbuffer));
+        std::vector<std::vector<int>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<int>(SCREEN_WIDTH + 1, INT_MIN));
         processed.clear();
         processed.resize(planes.size());
         
@@ -157,21 +156,24 @@ int main()
         myshader.setMat("view", viewMat);
 
         processed = planes;
-        backFaceCull_CameraView(processed);
-        std::vector<std::vector<int>> Zbuffer(SCREEN_HEIGHT+1,std::vector<int>(SCREEN_WIDTH+1,INT_MIN));
+        //method 1
+        //backFaceCull_CameraView(processed);
         
-        /*for (auto i = 0; i < processed.size(); i++)
+
+        //method 2
+        //===========================================================
+        for (auto i = 0; i < processed.size(); i++)
         {
             processed[i].diffuseIntensities(pointlight);
             processed[i].rotate(angle);
             processed[i].calculateCentroid();
-            processed[i].specularIntensities();
-        }*/
-
-      
+           // processed[i].specularIntensities();
+        }
+        //=============================================================
+        //sort(processed);
         for (auto i : processed)
         {
-            i.draw(0,Zbuffer);
+            i.draw(0, Zbuffer);
         }
 
         glPopMatrix();

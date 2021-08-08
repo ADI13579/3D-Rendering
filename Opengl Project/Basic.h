@@ -5,7 +5,7 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
-static coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,500);
+static coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,500);
 static Camera mycamera(coordinate3f(0,0,0));
 static coordinate3f sky(0.58, 0.89, 0.96);
 static float Zbuffer[SCREEN_HEIGHT + 1][SCREEN_WIDTH + 1] = { INT_MIN };
