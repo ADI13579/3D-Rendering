@@ -51,8 +51,8 @@ bool liesOutside(plane_t plane)
     plane.sort();
     if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
         return 1;
-    //SIMILAR TO ABOVE
 
+    //SIMILAR TO ABOVE
     std::vector<float> X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
     std::sort(X.begin(), X.end());
     if (X[0] > SCREEN_WIDTH || X[2] < 0)
@@ -71,7 +71,7 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
             i.diffuseIntensities(pointlight);
-           i.specularIntensities();
+            i.specularIntensities();
             i = myshader.getShadedPlane(i);
             if (!liesOutside(i))
             {
@@ -115,6 +115,10 @@ int main()
     glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1000);
  
     glEnable(GL_POINT_SMOOTH);
+    int a[4][4] = { 0 };
+    
+    std::cout << a[0][0]<<std::endl;
+    std::cout << a[1][1]<<std::endl;
 
     std::vector<plane_t> set1(planes.begin(), planes.begin() + planes.size() / 2);
     std::vector<plane_t> set2(planes.begin() + planes.size() / 2, planes.end());
@@ -123,11 +127,16 @@ int main()
     std::vector<plane_t> part2(set2.size());
     std::vector<plane_t> processed(planes.size());
     int angle = 0;
+    plane_t test= planes[0];
+    test.v[0] = coordinate3f(0, 0, 0);
+    test.v[1] = coordinate3f(0, SCREEN_HEIGHT, 0);
+    test.v[1] = coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0);
 
     while (!glfwWindowShouldClose(window))
     {
-        std::vector<std::vector<coordinate3f>> pixels(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
+        std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
         std::vector<std::vector<int>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<int>(SCREEN_WIDTH + 1, INT_MIN));
+        
         processed.clear();
         processed.resize(planes.size());
 
@@ -154,31 +163,32 @@ int main()
 
         processed = planes;
         //method 1
-       //backFaceCull_CameraView(processed);
+       backFaceCull_CameraView(processed);
 
         //method 2
         //===========================================================
-        for (auto i = 0; i < processed.size(); i++)
+       /*for (auto i = 0; i < processed.size(); i++)
         {
             processed[i].diffuseIntensities(pointlight);
             processed[i].rotate(angle);
             processed[i].calculateCentroid();
             processed[i].specularIntensities();
-        }
+        }*/
         //=============================================================
         //sort(processed);
+        
         for (auto i : processed)
         {
-            i.draw(0, Zbuffer, pixels);
+            i.draw(1, Zbuffer, pixelbuffer);
         }
-
-        //till this point colour of pixels are maintained in a 2D array called pixels
+        //test.draw(0,Zbuffer,pixelbuffer);
+        //till this point colour of pixels are maintained in a 2D array called pixelBUFFER
         glBegin(GL_POINTS);
-        for (int i = 0; i < pixels.size(); i++)
+        for (int i = 0; i < pixelbuffer.size(); i++)
         {
-            for (int j = 0; j < pixels[0].size(); j++)
+            for (int j = 0; j < pixelbuffer[0].size(); j++)
             {
-                    glColor3f(pixels[i][j].x, pixels[i][j].y, pixels[i][j].z);    
+                    glColor3f(pixelbuffer[i][j].x, pixelbuffer[i][j].y, pixelbuffer[i][j].z);    
                     glVertex2i(i,j);
             }
         }

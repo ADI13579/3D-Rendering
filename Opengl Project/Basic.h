@@ -12,8 +12,7 @@ static coordinate3f testcamera(SCREEN_WIDTH/2,SCREEN_HEIGHT/2,500);
 static coordinate3f sky(0.58, 0.89, 0.96);
 static coordinate3f BLACK;
 
-
-static void putpixel(coordinate3f pixel, coordinate3f color, float alpha=0)
+static void putpixel(coordinate3f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)
 {
     if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
         return;
@@ -21,24 +20,10 @@ static void putpixel(coordinate3f pixel, coordinate3f color, float alpha=0)
     if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
         return;
 
-    glColor4f(color.x, color.y, color.z,alpha);
-    glVertexPointer(2, GL_FLOAT, 0, &pixel.x);
-    glDrawArrays(GL_POINTS, 0, 1);
+    pixelbuffer[int(pixel.x)][int(pixel.y)]=color;
 };
 
-
-static void putpixel(coordinate3f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixels)
-{
-    if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
-        return;
-
-    if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
-        return;
-
-    pixels[int(pixel.x)][int(pixel.y)]=color;
-};
-
-static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
+static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color,std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
     coordinate3f temp;
     int x1 = a.x, x2 = b.x;
@@ -80,7 +65,7 @@ static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color)
             y1 += yinc;
         }
         x1 += 1;
-        putpixel(temp, color, 0);
+        putpixel(temp, color,pixelbuffer);
     }
 }
 

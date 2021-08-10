@@ -9,6 +9,7 @@ public:
     //to be calculated
     //=========================
     coordinate3f I[3];
+    void debug();
     plane_t() {};
     plane_t(simpleplane _p, material _m)
     {
