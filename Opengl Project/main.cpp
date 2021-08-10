@@ -2,7 +2,6 @@
 #include"parser.h"
 #include"Basic.h"
 #include"Shader.h"
-#include<thread>
 
 //-z is out of the screen +z is inside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -37,6 +36,7 @@ float lastFrame = 0.0f;
 void ClearWindow()
 {
     glClearColor(sky.x, sky.y, sky.z, 0.50);
+    //glClearColor(sky.x, sky.x, sky.x, 0.50);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix();
     glEnable(GL_POINT_SMOOTH);
@@ -70,7 +70,7 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
     {
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
-            i.diffuseIntensities(pointlight*-1);
+            i.diffuseIntensities(pointlight);
            i.specularIntensities();
             i = myshader.getShadedPlane(i);
             if (!liesOutside(i))
@@ -112,12 +112,9 @@ int main()
 
     glfwMakeContextCurrent(window);
     glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
-    glMatrixMode(GL_PROJECTION);
     glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1000);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnable(GL_BLEND);
+ 
+    glEnable(GL_POINT_SMOOTH);
 
     std::vector<plane_t> set1(planes.begin(), planes.begin() + planes.size() / 2);
     std::vector<plane_t> set2(planes.begin() + planes.size() / 2, planes.end());
@@ -129,11 +126,12 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        std::vector<std::vector<coordinate3f>> pixels(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
         std::vector<std::vector<int>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<int>(SCREEN_WIDTH + 1, INT_MIN));
         processed.clear();
         processed.resize(planes.size());
-        
-        ClearWindow();
+
+        //ClearWindow();
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -146,7 +144,6 @@ int main()
         myshader.setMat("projection", projMat);
         //show_matrix(projMat);
 
-
         // set the model matrix
         float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
         myshader.setMat("model", modelMat);
@@ -157,8 +154,7 @@ int main()
 
         processed = planes;
         //method 1
-        //backFaceCull_CameraView(processed);
-        
+       //backFaceCull_CameraView(processed);
 
         //method 2
         //===========================================================
@@ -167,26 +163,35 @@ int main()
             processed[i].diffuseIntensities(pointlight);
             processed[i].rotate(angle);
             processed[i].calculateCentroid();
-           // processed[i].specularIntensities();
+            processed[i].specularIntensities();
         }
         //=============================================================
         //sort(processed);
         for (auto i : processed)
         {
-            i.draw(0, Zbuffer);
+            i.draw(0, Zbuffer, pixels);
         }
 
-        glPopMatrix();
+        //till this point colour of pixels are maintained in a 2D array called pixels
+        glBegin(GL_POINTS);
+        for (int i = 0; i < pixels.size(); i++)
+        {
+            for (int j = 0; j < pixels[0].size(); j++)
+            {
+                    glColor3f(pixels[i][j].x, pixels[i][j].y, pixels[i][j].z);    
+                    glVertex2i(i,j);
+            }
+        }
+        glEnd();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
         std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
 
         angle++;
         angle = angle % 360;
-
     }
 
-    glDisableClientState(GL_VERTEX_ARRAY);
     glDisable(GL_POINT_SMOOTH);
     glfwTerminate();
     return 0;

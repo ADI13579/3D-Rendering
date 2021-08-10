@@ -235,7 +235,7 @@ namespace parser
                         };
                     }
 
-                    float fac = 300;
+                    float fac = SCREEN_WIDTH;
                     p.scale(fac,ratioyx*fac,fac*ratiozx);
                     p.translate(coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -500));
                     plane_t t(p, materialBind);

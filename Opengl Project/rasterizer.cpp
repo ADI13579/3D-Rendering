@@ -3,20 +3,6 @@
 #include"Basic.h"
 #include<algorithm>
 #include"Shader.h"
-void putpixel(coordinate3f pixel, coordinate3f color, float alpha)
-{
-    if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
-        return;
-
-    if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
-        return;
-    
- 
-        Zbuffer[int(pixel.x)][int(pixel.y)] = pixel.z;
-        glColor3f(color.x, color.y, color.z);
-        glVertexPointer(2, GL_FLOAT, 0, &pixel.x);
-        glDrawArrays(GL_POINTS, 0, 1);
-};
 
 void plane_t::diffuseIntensities(coordinate3f pointlight)
 {
@@ -96,16 +82,17 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
 
 //RASTERIZING PART
 //RASTERIZING PART
-void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer)
+void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector<std::vector<coordinate3f>> &pixels)
 {
-    sort();
-    coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]);
-    float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
-
+    //this part seems to be efficient if breshenham algorithm is used 
+    sort();//this must be done befor calculating div
     //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
     float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
     if (div == 0)
         return;
+
+    coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]);
+    float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
 
     std::vector<coordinate2i> t = {
                                     coordinate2i(v[0].x,v[0].y),
@@ -128,42 +115,47 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer)
         };
 
         std::sort(point.begin(), point.end());
-        if (point[2] == INT_MAX)
-            point.pop_back();
-
-        //part for clippig points that lies outside
-        //since x1 to x2 is already sorted the line doesnt lie inside if x1<0 || x2>SCREEN_WIDTH
-        if (!(point[0] > SCREEN_WIDTH || point[1] < 0))
+      
+        
+        if (MESH && point[0]>=0 && point[1]<=SCREEN_WIDTH)
         {
-            if (point[0] < 0)
-                point[0] = 0;
-            if (point[1] > SCREEN_WIDTH)
-                point[1] = SCREEN_WIDTH;
+            temp.x = point[0];
+            putpixel(temp, BLACK, 0);
+            temp.x = point[1];
+            putpixel(temp, BLACK, 0);
+            Zbuffer[int(point[0])][y] = INT_MAX;
+            Zbuffer[int(point[1])][y] = INT_MAX;
+        }
 
-            for (int x = point[0]; x <= point[1]; x++)
+        if (point[0] < 0)
+            point[0] = 0;
+        if (point[1] > SCREEN_WIDTH)
+            point[1] = SCREEN_WIDTH;
+
+        for (int x = point[0]; x <= point[1]; x++)
+        {
+            temp.x = x;
+            temp.z = (D - x * A.x - y * A.y) / A.z;
+            temp.z += (D - (x-1) * A.x - (y+1) * A.y) / A.z;
+            temp.z /= 2;
+
+            if (Zbuffer[x][y] <=temp.z)
             {
-                temp.x = x;
-                temp.z = (D - x * A.x - y * A.y) / A.z;
-                temp.z += (D - (x-1) * A.x - (y+1) * A.y) / A.z;
-                temp.z /= 2;
+                Zbuffer[x][y] = temp.z;
+                float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
+                float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
+                float W2 = 1.0 - W0 - W1;
+                coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
 
-                if (Zbuffer[x][y] < temp.z)
-                {
-                    Zbuffer[x][y] = temp.z;
-                    float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
-                    float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
-                    float W2 = 1.0 - W0 - W1;
-                    coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-
-                    putpixel(temp, color, d);
-                }
+                putpixel(temp, color,pixels);
             }
         }
+            
     }
-    if (MESH)
+    /*if (MESH)
     {
         Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1));
         Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1));
         Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1));
-    }
+    }*/
 }

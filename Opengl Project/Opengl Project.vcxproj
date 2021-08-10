@@ -53,7 +53,7 @@
     <ProjectGuid>{6114415f-1647-46cd-8f61-3301908b07ab}</ProjectGuid>
     <RootNamespace>OpenglProject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Doom3</ProjectName>
+    <ProjectName>ghantaghar</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

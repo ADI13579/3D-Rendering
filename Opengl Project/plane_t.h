@@ -32,7 +32,7 @@ public:
     //Gets the x of intersect point return INT_MAX if the line is vertical 
     //code in rasterize.h
     float GetIntersectPoint(coordinate2i a, coordinate2i b, int y);
-    void draw(bool,std::vector<std::vector<int>> &Zbuffer);
+    void draw(bool,std::vector<std::vector<int>> &Zbuffer, std::vector<std::vector<coordinate3f>> &pixels);
     void makeCalculations()
     {
         simpleplane::makeCalculations();
