@@ -71,10 +71,11 @@ void backFaceCull_CameraView(std::vector<plane_t>& planes)
         if (((mycamera.Front) ^ i.centroidNormal) <= 0)
         {
             i.diffuseIntensities(pointlight);
-            i.specularIntensities();
             i = myshader.getShadedPlane(i);
             if (!liesOutside(i))
             {
+                i.makeCalculations();
+                i.specularIntensities(mycamera.Position);
                 selected.push_back(i);
             }
         }
@@ -163,7 +164,7 @@ int main()
 
         processed = planes;
         //method 1
-       backFaceCull_CameraView(processed);
+        backFaceCull_CameraView(processed);
 
         //method 2
         //===========================================================
@@ -171,7 +172,7 @@ int main()
         {
             processed[i].diffuseIntensities(pointlight);
             processed[i].rotate(angle);
-            processed[i].calculateCentroid();
+            processed[i].makeCalculations();
             processed[i].specularIntensities();
         }*/
         //=============================================================
@@ -179,7 +180,7 @@ int main()
         
         for (auto i : processed)
         {
-            i.draw(1, Zbuffer, pixelbuffer);
+            i.draw(0, Zbuffer, pixelbuffer);
         }
         //test.draw(0,Zbuffer,pixelbuffer);
         //till this point colour of pixels are maintained in a 2D array called pixelBUFFER
@@ -216,13 +217,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         switch (key)
         {
 
-        case GLFW_KEY_A:
-            std::cout << "deltatime" << deltaTime;
-            mycamera.ProcessKeyboard(LEFT, deltaTime * 3);
-            break;
-        case GLFW_KEY_D:
-            mycamera.ProcessKeyboard(RIGHT, deltaTime * 3);
-            break;
+            case GLFW_KEY_A:
+                std::cout << "deltatime" << deltaTime;
+                mycamera.ProcessKeyboard(LEFT, deltaTime * 10);
+                break;
+            case GLFW_KEY_D:
+                mycamera.ProcessKeyboard(RIGHT, deltaTime * 10);
+                break;
         }
     }
 }

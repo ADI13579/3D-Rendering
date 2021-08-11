@@ -3,12 +3,7 @@
 #include"Basic.h"
 #include<algorithm>
 #include"Shader.h"
-void plane_t::debug()
-{
-        for (int i = 0; i < 3; i++);
-        std::cout << "Debug Now  " << std::endl;
 
-}
 void plane_t::diffuseIntensities(coordinate3f pointlight)
 {
     /*
@@ -27,7 +22,7 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
         if (a > 0) I[i] = I[i] + kd * a;
 
     }
-}void plane_t::specularIntensities()
+}void plane_t::specularIntensities(coordinate3f camera)
 {
     /*
          H = unitvec(L + V)
@@ -35,13 +30,19 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
                     V=point to camera;
         I = Idiff + Ispec
             = ka Ia + kd Il(N · L) + ks Il(N · H)^ns
-    */
+        
+        V is the unit vector pointing to the viewer from the selected
+        surface position
+
+        Because V and R are unit vectors in the viewing and specular-reflection directions
+
+   */
     //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
     for (int i = 0; i < 3; i++)
     {
-        float a = !(v[i] * 2 - pointlight - mycamera.Position) ^ !vn[i];
+        coordinate3f L = !(v[i] - camera);
+        float a = !(v[i]-mycamera.Position)^!(centroidNormal* 2 * (vn[i] ^ L) -L);
         if (a > 0) I[i] = I[i] + ks * (pow(a, Ns));
-
         I[i].x = I[i].x > 1 ? 1 : I[i].x;
         I[i].y = I[i].y > 1 ? 1 : I[i].y;
         I[i].z = I[i].z > 1 ? 1 : I[i].z;
@@ -99,14 +100,16 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector
     coordinate3f A = (v[0] - v[1]) * (v[0] - v[2])*1000;
     float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
 
-    std::vector<coordinate2i> t = {
-                                    coordinate2i(v[0].x,v[0].y),
-                                    coordinate2i(v[1].x,v[1].y),
-                                    coordinate2i(v[2].x,v[2].y),
+    std::vector<coordinate2f> t = {
+                                    coordinate2f(v[0].x,v[0].y),
+                                    coordinate2f(v[1].x,v[1].y),
+                                    coordinate2f(v[2].x,v[2].y),
     };
     
-    for (int y = t[0].y; y <= t[2].y; y++)
+
+    for (int y = (t[0].y+0.5); y <= (t[2].y+0.5); y++)
     {
+
         if (y < 0)
             y = 0;
         else if (y > SCREEN_HEIGHT)
@@ -130,26 +133,23 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector
             point.pop_back();
         }
 
-        if (point[0] < 0)
-            point[0] = 0;
-        if (point[1] > SCREEN_WIDTH)
-            point[1] = SCREEN_WIDTH;
+        int X[]= { point[0],point[1] };
+        X[0] = X[0] < 0 ? 0 : X[0];
+        X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH: X[1];
 
-        for (int x = int(point[0]); x <= int(point[1]); x++)
+        for (int x = X[0]; x <= X[1]; x++)
         {
             temp.x = x;
             
             temp.z = -((D - x * A.x - y * A.y) / A.z);
-
-            if (Zbuffer[x][y]<=temp.z+2 || (pixelbuffer[x][y]==sky))
+            if (Zbuffer[x][y] <= temp.z + 2 || (pixelbuffer[x][y] == sky))
             {
                 Zbuffer[x][y] = temp.z;
                 float W0 = ((t[1].y - t[2].y) * (x - t[2].x) + (t[2].x - t[1].x) * (y - t[2].y)) / div;
                 float W1 = ((t[2].y - t[0].y) * (x - t[2].x) + (t[0].x - t[2].x) * (y - t[2].y)) / div;
                 float W2 = 1.0 - W0 - W1;
                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-
-                putpixel(temp, color,pixelbuffer);
+                putpixel(temp, color, pixelbuffer);
             }
         }
 
@@ -160,7 +160,8 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector
         }
     }
     
-    //since scan line already computes all points lying in edges Brshenham is not required for lines that are not horizontal
+    //since scan line already computes all points lying in edges Brshenham is not required 
+    //for lines that are not horizontal
     if (MESH)
     {
         std::vector<coordinate3f> point;
@@ -183,7 +184,7 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector
             if (X[0] > SCREEN_WIDTH || X[1] < 0)
                 return;
             
-            for (int x = X[0]; x < X[1]; x++)
+            for (int x = X[0]; x <=X[1]; x++)
             {
                 if (x < 0)
                     x = 0;
@@ -193,10 +194,10 @@ void plane_t::draw(bool MESH,std::vector<std::vector<int>> &Zbuffer, std::vector
             }
         }
     }
-    /*if (MESH)
+    if (MESH)
     {
         Bresenham_Line(t[0], t[1], coordinate3f(0, 1, 1),pixelbuffer);
         Bresenham_Line(t[0], t[2], coordinate3f(0, 1, 1),pixelbuffer);
         Bresenham_Line(t[1], t[2], coordinate3f(0, 1, 1),pixelbuffer);
-    }*/
+    }
 }

@@ -7,7 +7,7 @@ void simpleplane::makeCalculations()
         return;
 
     centroid = (v[0] + v[1] + v[2]) / 3;
-    centroidNormal = (centroid - v[0]) * (centroid - v[1]);
+    centroidNormal = !((centroid - v[0]) * (centroid - v[1]));
     if ((vn[0] ^ centroidNormal) <= 0)
         centroidNormal = centroidNormal * -1;
 }

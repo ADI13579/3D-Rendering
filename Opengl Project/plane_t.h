@@ -61,7 +61,7 @@ public:
         }
     }
     void diffuseIntensities(coordinate3f);
-    void specularIntensities();
+    void specularIntensities(coordinate3f camera);
     void print();
     void calculateCentroid()
     {
