@@ -3,8 +3,8 @@
 #include <fstream>
 #include<algorithm>
 #include"Basic.h"
-//Inefficient parser
 
+//Inefficient parser
 //merge sort is use to sort on the basis of z and draw
 //maybe removed after camera
 
@@ -66,7 +66,7 @@ namespace parser
             return face;
         }
 
-        std::vector<plane_t> parse(std::string filename)
+        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex)
         {
             std::vector<plane_t> planes;
             std::vector<coordinate3f> vertexes;
@@ -80,11 +80,12 @@ namespace parser
                 std::cout << filename << " opening error" << std::endl;
                 return planes;
             }
-
+            
             std::istringstream lineSS;
             std::vector<std::string> materialids;
             std::string lineType;
             std::vector<float> normalizev[3];
+            std::vector<float> normalizevt[2];
             while (std::getline(obj, lineStr))
             {
                 lineSS = std::istringstream(lineStr);;
@@ -122,6 +123,8 @@ namespace parser
             std::sort(normalizev[1].begin(), normalizev[1].end());
             std::sort(normalizev[2].begin(), normalizev[2].end());
             
+
+            
             coordinate3f scale(
                 normalizev[0].back() - normalizev[0].front(),
                 normalizev[1].back() - normalizev[1].front(),
@@ -134,7 +137,13 @@ namespace parser
                 vertexes[i] = vertexes[i] + coordinate3f(-normalizev[0][0], -normalizev[1][0], normalizev[2][0]);
                 vertexes[i] = vertexes[i].scaling(scale.x,scale.y,scale.z);
             }
-
+            int  count=0;
+            for (auto i : textures)
+            {
+                if (i.x > 1 || i.y > 1)
+                    count++;
+            }
+           
             
             float ratioyx = scale.x/scale.y;
             float ratiozx = scale.x / scale.z;
@@ -143,10 +152,8 @@ namespace parser
             for (auto i : materialids)
             {
                 material temp;
-                int a = mtl.tellg();
                 while (std::getline(mtl, lineStr))
                 {
-                     
                     if (lineStr == "newmtl " + i)
                     {
                         temp.id = i;
@@ -184,6 +191,41 @@ namespace parser
                         lineSS = std::istringstream(lineStr);
                         lineSS >> lineType;
                         lineSS >> temp.d;
+                        
+                        getline(mtl, lineStr);
+                        getline(mtl, lineStr);
+                        lineSS = std::istringstream(lineStr);
+                        lineSS >> lineType;
+
+                        
+                        if (lineType == "map_Kd")
+                        {
+                            std::string texfilename,copy;
+                            lineSS >> texfilename;
+
+                            while (lineSS>>copy)
+                            {
+                                texfilename += " " + copy;
+                            }
+
+                            for (int i = 0; i < tex.size(); i++)
+                            {
+                                if (tex[i].filename == texfilename)
+                                {
+                                    temp.tex = &tex[i];
+                                }
+                            }
+
+                            if (!temp.tex)
+                            {
+                                texture _t(texfilename);
+                                if (_t.load())
+                                {
+                                    tex.push_back(_t);
+                                    temp.tex = &tex[tex.size() - 1];
+                                }
+                            }
+                        }
                         materials.push_back(temp);
                         break;
                     }
@@ -226,7 +268,7 @@ namespace parser
                               normal[sep[2][2]],
                         };
                     }
-                    if (textures.size() != 0 && sep[1][0]!=-1)
+                    if (textures.size() != 0 && sep[1][0] != -1)
                     {
                         p.vt = {
                                    textures[sep[1][0]],
@@ -236,14 +278,16 @@ namespace parser
                     }
 
                     float fac = SCREEN_WIDTH/4;
+                
                     p.scale(fac,ratioyx*fac,ratiozx* fac);
                     p.translate(coordinate3f(SCREEN_WIDTH/2, 0, -500));
+
                     plane_t t(p, materialBind);
                     t.makeCalculations();
                     planes.push_back(t);
-                }
+                 }
             }
-
+            std::cout<<planes.capacity();
             std::cout << "Triangles Recorded" << planes.size()<<std::endl;
             return planes;
         }

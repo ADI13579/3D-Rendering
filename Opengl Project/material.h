@@ -1,6 +1,8 @@
 #pragma once
 #include<string>
 #include"coordinate.h"
+#include"texture.h"
+
 class material
 {
 public:
@@ -13,7 +15,9 @@ public:
     coordinate3f ks;
     coordinate3f ke;
     coordinate3f Ni;
+    texture* tex;
     float d;
+    material() { tex = 0;}
     //===============================================
     void print()
     {
@@ -24,5 +28,6 @@ public:
         std::cout << "ke :"; ke.print();
         std::cout << "Ni :"; Ni.print();
         std::cout << "d :" << d << std::endl;
+        std::cout << "tex :" << tex << std::endl;
     }
 };

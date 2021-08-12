@@ -131,7 +131,14 @@ public:
         x = _t.x;
         y = _t.y;
     }
-
+    
+    coordinate2f operator * (float t) {
+        return coordinate2f(x * t, y * t);
+    }
+    
+    coordinate2f operator + (coordinate2f t) {
+        return coordinate2f(x + t.x, y + t.y);
+    }
     
     void print()
     {
