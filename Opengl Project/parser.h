@@ -3,8 +3,8 @@
 #include <fstream>
 #include<algorithm>
 #include"Basic.h"
-//Inefficient parser
 
+//Inefficient parser
 //merge sort is use to sort on the basis of z and draw
 //maybe removed after camera
 
@@ -27,6 +27,23 @@
 //parser to load obj files already divided into triangles
 namespace parser
 {
+        void managetex(coordinate2f& vt)
+        {
+            double intpart;
+            if (vt.x > 1)
+            {
+                vt.x = modf(vt.x, &intpart);
+                if (int(intpart * 10) == 0)
+                    vt.x = 1;
+            }
+            if (vt.y > 1)
+            {
+                vt.y = modf(vt.x, &intpart);
+                if (int(intpart * 10) == 0)
+                    vt.y = 1;
+            }
+        }
+
         void transpose(std::vector<std::vector<int> >& b)
         {
             if (b.size() == 0)
@@ -66,11 +83,10 @@ namespace parser
             return face;
         }
 
-        std::vector<plane_t> parse(std::string filename)
+        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex,coordinate3f &scalefactor,std::vector<coordinate3f> &vertexes)
         {
             std::vector<plane_t> planes;
-            std::vector<coordinate3f> vertexes;
-            std::vector<coordinate2f> textures;
+            std::vector<coordinate3f> textures;
             std::vector<coordinate3f> normal;
             std::vector<material> materials;
             std::string data, lineStr;
@@ -80,11 +96,12 @@ namespace parser
                 std::cout << filename << " opening error" << std::endl;
                 return planes;
             }
-
+            
             std::istringstream lineSS;
             std::vector<std::string> materialids;
             std::string lineType;
             std::vector<float> normalizev[3];
+            std::vector<float> normalizevt[2];
             while (std::getline(obj, lineStr))
             {
                 lineSS = std::istringstream(lineStr);;
@@ -102,7 +119,7 @@ namespace parser
                 {
                     float u = 0, v = 0;
                     lineSS >> u >> v;
-                    textures.push_back(coordinate2f(u, v));
+                    textures.push_back(coordinate3f(u, v,1));
                 }
                 else if (lineType == "vn")
                 {
@@ -122,6 +139,8 @@ namespace parser
             std::sort(normalizev[1].begin(), normalizev[1].end());
             std::sort(normalizev[2].begin(), normalizev[2].end());
             
+
+            
             coordinate3f scale(
                 normalizev[0].back() - normalizev[0].front(),
                 normalizev[1].back() - normalizev[1].front(),
@@ -134,21 +153,25 @@ namespace parser
                 vertexes[i] = vertexes[i] + coordinate3f(-normalizev[0][0], -normalizev[1][0], normalizev[2][0]);
                 vertexes[i] = vertexes[i].scaling(scale.x,scale.y,scale.z);
             }
-
-            
+            int  count=0;
+            for (auto i : textures)
+            {
+                if (i.x > 1 || i.y > 1)
+                    count++;
+            }
+           
             float ratioyx = scale.x/scale.y;
             float ratiozx = scale.x / scale.z;
 
             std::fstream mtl(filename + ".mtl", std::ios::in);
             for (auto i : materialids)
             {
-                material temp;
-                int a = mtl.tellg();
+                bool found=0;
                 while (std::getline(mtl, lineStr))
                 {
-                     
                     if (lineStr == "newmtl " + i)
                     {
+                        material temp;
                         temp.id = i;
                         getline(mtl, lineStr);
                         lineSS = std::istringstream(lineStr);
@@ -184,10 +207,50 @@ namespace parser
                         lineSS = std::istringstream(lineStr);
                         lineSS >> lineType;
                         lineSS >> temp.d;
+                        
+                        getline(mtl, lineStr);
+                        getline(mtl, lineStr);
+                        lineSS = std::istringstream(lineStr);
+                        lineSS >> lineType;
+
+                        
+                        if (lineType == "map_Kd")
+                        {
+                            std::string texfilename,copy;
+                            lineSS >> texfilename;
+
+                            while (lineSS>>copy)
+                            {
+                                texfilename += " " + copy;
+                            }
+
+                            for (int i = 0; i < tex.size(); i++)
+                            {
+                                if (tex[i].filename == texfilename)
+                                {
+                                    temp.tex = &tex[i];
+                                }
+                            }
+
+                            if (!temp.tex)
+                            {
+                                texture _t(texfilename);
+                                if (_t.load())
+                                {
+                                    tex.push_back(_t);
+                                    temp.tex = &tex[tex.size() - 1];
+                                }
+                            }
+                        }
+                        found = 1;
                         materials.push_back(temp);
                         break;
                     }
                 }
+
+                if (!found)
+                    materials.push_back(material());
+
                 mtl.clear();
                 mtl.seekg(0);
             }
@@ -226,7 +289,7 @@ namespace parser
                               normal[sep[2][2]],
                         };
                     }
-                    if (textures.size() != 0 && sep[1][0]!=-1)
+                    if(textures.size() != 0 && sep[1][0] != -1)
                     {
                         p.vt = {
                                    textures[sep[1][0]],
@@ -235,16 +298,21 @@ namespace parser
                         };
                     }
 
-                    float fac = SCREEN_WIDTH/4;
-                    p.scale(fac,ratioyx*fac,ratiozx* fac);
-                    p.translate(coordinate3f(SCREEN_WIDTH/2, 0, -500));
+                    float fac = SCREEN_WIDTH;
+
+                    p.scale(fac, ratioyx* fac, ratiozx* fac);
+                    p.translate(coordinate3f(0, 0, -500));
+                    scalefactor.x = 4*fac;
+                    scalefactor.y=ratioyx* scalefactor.x;
+                    scalefactor.z=ratiozx* scalefactor.x;
+
                     plane_t t(p, materialBind);
                     t.makeCalculations();
                     planes.push_back(t);
-                }
+                 }
             }
-
             std::cout << "Triangles Recorded" << planes.size()<<std::endl;
+            std::cout << "Vertices Recorded" << vertexes.size()<<std::endl;
             return planes;
         }
 };

@@ -3,15 +3,14 @@
 #include"coordinate.h"
 #include"camera.h"
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
-#define PI 3.14159
-static coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
-static Camera mycamera(coordinate3f(0,0,0));
-static coordinate3f sky(0.58, 0.89, 0.96);
-static coordinate3f BLACK;
+//#define SCREEN_WIDTH 1000
+//#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
 
-static void putpixel(coordinate3f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)
+#define PI 3.14159
+
+static void putpixel(coordinate2f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)
 {
     if ((pixel.x < 0 || pixel.x > SCREEN_WIDTH))
         return;
@@ -19,10 +18,10 @@ static void putpixel(coordinate3f pixel, coordinate3f color,std::vector<std::vec
     if ((pixel.y < 0 || pixel.y > SCREEN_HEIGHT))
         return;
 
-    pixelbuffer[int(pixel.x)][int(pixel.y)]=color;
+    pixelbuffer[int(pixel.y)][int(pixel.x)]=color;
 };
 
-static void Bresenham_Line(coordinate2i a, coordinate2i b, coordinate3f color,std::vector<std::vector<coordinate3f>>& pixelbuffer)
+static void Bresenham_Line(coordinate3f a, coordinate3f b, coordinate3f color,std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
     coordinate3f temp;
     int x1 = a.x, x2 = b.x;

@@ -14,10 +14,9 @@ static void show_matrix(float mat[4][4]) {
             std::cout << mat[i][j] << " ";
         std::cout << "\n";
     }
-
 }
-///////////////////////////////////////////////////
 
+///////////////////////////////////////////////////
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -29,9 +28,9 @@ enum Camera_Movement {
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 20.0f;
-const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.0f;
+const float SPEED = 2.5f;
+const float SENSITIVITY = 0.01f;
+const float ZOOM = 45.0;
 //Pi defined multiple files
 
 
@@ -54,13 +53,14 @@ public:
     float Zoom;
 
     // constructor with vectors
-    Camera(coordinate3f position = coordinate3f(0.0f, 0.0f, 0.0f), coordinate3f up = coordinate3f(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(coordinate3f(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(coordinate3f position = coordinate3f(0.0f, 0.0f, 3.0f), coordinate3f up = coordinate3f(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(coordinate3f(0.0,0,-5)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
     {
         Position = position;
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
         updateCameraVectors();
+        //std::cout << "x:" << Front.x << "y:" << Front.y << "z:" << Front.z;
     }
     // constructor with scalar values
   /*  Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -82,13 +82,14 @@ public:
     {
 
         //std::cout <<"x:" << eye.x <<"y:" << eye.y <<"z:"<< eye.z;
+        //std::cout << "x:" << target.x << "y:" << target.y << "z:" << target.z;
         // compute the forward vector from target to eye
         coordinate3f forward = eye - target;
         forward = !forward;                 // make unit length
         //std::cout << "x:" << forward.x << "y:" << forward.y << "z:" << forward.z;
 
         // compute the left vector
-        coordinate3f left = upDir*forward; // cross product
+        coordinate3f left = (upDir)*forward; // cross product
         left = !left; // make left normalized
         //std::cout << "x:" << left.x << "y:" << left.y << "z:" << left.z;
 
@@ -115,10 +116,14 @@ public:
         matrix[2][1] = forward.y;
         matrix[2][2] = forward.z;
 
+        //matrix[0][3] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
+        //matrix[1][3] = -up.x * eye.x - up.y * eye.y - up.z * eye.z;
+        //matrix[2][3] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+
         // set translation part
-        matrix[0][3] = -left.x * eye.x - left.y * eye.y - left.z * eye.z;
-        matrix[1][3] = -up.x * eye.x - up.y * eye.y - up.z * eye.z;
-        matrix[2][3] = -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+        matrix[0][3] = -(left ^ eye);
+        matrix[1][3] = -(up ^eye);
+        matrix[2][3] = -(forward^ eye);
 
      
         matrix[3][3] = 1;
@@ -149,6 +154,7 @@ public:
         lookAtMatrix[1] = new float[4];
         lookAtMatrix[2] = new float[4];
         lookAtMatrix[3] = new float[4];*/
+        //std::cout << "x:" << Front.x << "y:" << Front.y << "z:" << Front.z;
         
 
         lookAt(Position, (Position + Front), Up, lookAtMatrix);
@@ -165,6 +171,8 @@ public:
         persMat[3][2] = -1;
         persMat[2][3] = -(2 * far * near) / (far - near);
 
+        persMat[3][3] = 0;
+
         //persMat = mat;
         //show_matrix(persMat);
 
@@ -177,15 +185,19 @@ public:
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
-        float velocity = MovementSpeed * deltaTime;
+        float velocity = 25 * deltaTime;
         if (direction == FORWARD)
-            Position = Position + coordinate3f( Front.x * velocity, Front.y * velocity, Front.z * velocity);
+        {
+            Position = Position + Front * velocity;
+            //std::cout << "position ";
+            //std::cout << Position.z;
+        }
         if (direction == BACKWARD)
-            Position = Position - coordinate3f(Front.x * velocity, Front.y * velocity, Front.z * velocity);
+            Position = Position - Front * velocity;
         if (direction == LEFT)
-            Position = Position - coordinate3f(Right.x * velocity, Right.y * velocity, Right.z * velocity);
+            Position = Position - Right * velocity;
         if (direction == RIGHT)
-            Position = Position + coordinate3f(Right.x * velocity, Right.y * velocity, Right.z * velocity);
+            Position = Position + Right*velocity;
         //std::cout << Position.x << "-- " << Position.y << "--" << Position.z;
     
     }
@@ -225,7 +237,6 @@ public:
     }
 
 private:
-
     float radians(float deg) {
         return PI / 180 * deg;
     }

@@ -6,14 +6,14 @@ class simpleplane
 public:
     simpleplane()
     {
-        v.resize(3);
-        vt.resize(3);
-        vn.resize(3);
+        v.resize(3,0);
+        vt.resize(3,0);
+        vn.resize(3,0);
     }
     //To be taken from the .obj file
     //=================================
     std::vector<coordinate3f> v;//vertices of plane
-    std::vector<coordinate2f> vt;//texture mapped to the above vertices if any
+    std::vector<coordinate3f> vt;//texture mapped to the above vertices if any
     std::vector<coordinate3f> vn;//avg unit normal of the vertices above
     //======================================
     //to be calculated
