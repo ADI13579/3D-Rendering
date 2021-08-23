@@ -16,15 +16,20 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
     //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
     for (int i = 0; i < 3; i++)
     {
-        I[i] = kd * 0.3;
-
         float a = (!vn[i] ^ !(pointlight - v[i]));
-        if (a > 0) I[i] = I[i] + kd * a;
+        if (a > 0) 
+        { 
+            I[i] = I[i] + kd * a;
+            I[i].x = I[i].x > 1 ? 1 : I[i].x;
+            I[i].y = I[i].y > 1 ? 1 : I[i].y;
+            I[i].z = I[i].z > 1 ? 1 : I[i].z;
+        }
     }
 
 }
 
-void plane_t::specularIntensities(coordinate3f camera)
+
+void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
 {
     /*
          H = unitvec(L + V)
@@ -47,11 +52,42 @@ void plane_t::specularIntensities(coordinate3f camera)
         coordinate3f V = !(v[i] - camera);
 
         float a = V ^ R;
+        if (a > 0) 
+        {
+            I[i] = I[i] + ks * (pow(a, Ns));
+            I[i].x = I[i].x > 1 ? 1 : I[i].x;
+            I[i].y = I[i].y > 1 ? 1 : I[i].y;
+            I[i].z = I[i].z > 1 ? 1 : I[i].z;
+        }
+    }
+}
 
-        if (a > 0) I[i] = I[i] + ks * (pow(a, Ns));
+void plane_t::ambientIntensities(float Ia)
+{
+    /*
+         H = unitvec(L + V)
+                    L=point to light
+                    V=point to camera;
+        I = Idiff + Ispec
+            = ka Ia + kd Il(N . L) + ks Il(N . H)^ns
+    */
+    //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
+    for (int i = 0; i < 3; i++)
+    {
+        I[i] = I[i] + kd * Ia;
         I[i].x = I[i].x > 1 ? 1 : I[i].x;
         I[i].y = I[i].y > 1 ? 1 : I[i].y;
         I[i].z = I[i].z > 1 ? 1 : I[i].z;
+    }
+}
+
+void plane_t::attenuate(coordinate3f pointlight)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        float d = v[i].distance(pointlight)/1000;
+        float k = 1 + 2 * d + 3 * d *d;
+        I[i] = I[i] * k;
     }
 }
 
@@ -90,7 +126,6 @@ float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
     return x;
 }
 
-//RASTERIZING PART
 //RASTERIZING PART
 void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
@@ -161,13 +196,15 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                 {
                     //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
 
+                 /* 
                     W0 /=v[0].z;
                     W1 /=v[1].z;
                     W2 /=v[2].z;
+                 */
 
                    coordinate2f te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
                    float Z=W0 + W1 + W2;
-                   te = te *(1/ Z);
+                   //te = te *(1/ Z);
 
 
                     te.x = fabs((te.x - floor(te.x)) * tex->width);
@@ -190,8 +227,8 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                     if (te.x > 0 && te.x < tex->width - 1 && te.y>0 && te.y < tex->height - 1)
                     {
                         coordinate3f z[2][2] = {
-                                                {tex->imagedata[te.y - 1][te.x - 1],tex->imagedata[te.y + 1][te.x - 1]},
-                                                {tex->imagedata[te.y - 1][te.x + 1],tex->imagedata[te.y + 1][te.x + 1]}
+                                                {tex->imagedata[int(te.y - 1)][int(te.x - 1)],tex->imagedata[int(te.y + 1)][int(te.x - 1)]},
+                                                {tex->imagedata[int(te.y - 1)][int(te.x + 1)],tex->imagedata[int(te.y + 1)][int(te.x + 1)]}
                         };
                         int x = te.x - floor(te.x);
                         int y = te.y - floor(te.y);

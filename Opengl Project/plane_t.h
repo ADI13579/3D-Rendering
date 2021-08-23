@@ -93,8 +93,10 @@ public:
             //v[i]=v[i].rotation(alpha, 0, 0, 1, pivot);
         }
     }
-    void diffuseIntensities(coordinate3f);
-    void specularIntensities(coordinate3f camera);
+    void attenuate(coordinate3f);
+    void ambientIntensities(float Ia);
+    void diffuseIntensities(coordinate3f pointlight);
+    void specularIntensities(coordinate3f pointlight,coordinate3f camera);
     void print();
     void calculateCentroid()
     {

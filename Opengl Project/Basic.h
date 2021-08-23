@@ -6,11 +6,6 @@
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 #define PI 3.14159
-static coordinate3f pointlight(0,SCREEN_HEIGHT,0);
-static Camera mycamera(coordinate3f(0,0,0));
-static coordinate3f sky(36/255.0, 34/255.0, 34/255.0);
-static coordinate3f BLACK;
-static bool *method=new bool;
 
 static void putpixel(coordinate2f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)
 {

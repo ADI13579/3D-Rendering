@@ -4,6 +4,8 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
+coordinate3f pointlight(0,0,0);
+
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
 void sort(std::vector<plane_t>& bar);
@@ -11,13 +13,12 @@ void sort(std::vector<plane_t>& bar);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-coordinate3f pivot;
 
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-
-static Shader myshader;
+Camera mycamera(coordinate3f(0, 0, 0));
+Shader myshader;
 bool firstMouse = true;
 float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 float pitch = 0.0f;
@@ -29,20 +30,10 @@ float fov = 45.0f;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-
-void ClearWindow()
-{
-    glClearColor(sky.x, sky.y, sky.z, 0.50);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPushMatrix();
-    glEnable(GL_POINT_SMOOTH);
-    glPointSize(1);
-}
-
 //dont process further if the plane lies completely outside
 bool liesOutside(plane_t plane)
 {
-    //IF THE LOWEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
+    //IF THE SMALLEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     //IF THE LARGEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     plane.sort();
     if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
@@ -79,7 +70,9 @@ void CameraView(std::vector<plane_t>& planes)
     for (auto i : planes)
     {
         i.diffuseIntensities(pointlight);
-        i.specularIntensities(mycamera.Position);
+        i.specularIntensities(pointlight,mycamera.Position);
+        i.attenuate(pointlight);
+        i.ambientIntensities(1);
         i = myshader.getShadedPlane(i);
         if (!liesOutside(i))
         {
@@ -92,13 +85,19 @@ void CameraView(std::vector<plane_t>& planes)
 
 int main()
 {
+
+    coordinate3f pivot;
+    coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
+
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
-    std::vector<plane_t> planes = parser::parse("model",tex);
+    std::string model = "test";
+    //std::string model = "model";
+
+    std::vector<plane_t> planes = parser::parse(model,tex);
 
     if (!glfwInit())
         return -1;
-
 
     window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ghantaghar", NULL, NULL);
     if (!window)
@@ -130,14 +129,9 @@ int main()
     std::vector<plane_t> processed;
     std::cout << planes.size();
 
-
+    glBegin(GL_POINTS);
     while (!glfwWindowShouldClose(window))
     {
-
-        std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
-        std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
-        
-        
         processed.clear();
         processed.resize(planes.size());
         processed = planes;
@@ -155,7 +149,7 @@ int main()
         //show_matrix(projMat);
 
         // set the model matrix
-        float modelMat[4][4] = { {1,0,0,-400},{0,1,0,-400},{0,0,1,-1000},{0,0,0,1} };
+        float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         // set the view matrix
         float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
@@ -165,14 +159,12 @@ int main()
             processed[i].rotate(angle, pivot);
 
         //method 1
-        *method = 0;
         //backface_elimination(processed);
         CameraView(processed);
 
         //method 2
         //===========================================================
-        /**method = 1;
-        for (auto i = 0; i < processed.size(); i++)
+       /* for (auto i = 0; i < processed.size(); i++)
         {
             processed[i].diffuseIntensities(pointlight);
             processed[i].rotate(angle,pivot);
@@ -181,13 +173,14 @@ int main()
         }*/
         //=============================================================
         
+        std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
+        std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
         for (auto i : processed)
             i.draw(0, Zbuffer, pixelbuffer);
 
 
         //till this point colour of pixels are maintained in a 2D array called pixelbuffer
-        glBegin(GL_POINTS);
-        
+
         for (int y = 0; y < pixelbuffer.size(); y++)
         {
             for (int x = 0; x < pixelbuffer[0].size(); x++)
@@ -196,15 +189,13 @@ int main()
                     glVertex2i(x,y);
             }
         }
-
-
-        glEnd();
-
+        
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
         std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
     }
-
+    glEnd();
     glDisable(GL_POINT_SMOOTH);
     glfwTerminate();
     return 0;
@@ -230,6 +221,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 break;
             case GLFW_KEY_T:
                 angle--;
+                break;
+            case GLFW_KEY_8:
+                pointlight.z-=10;
+                pointlight.print();
+                break;
+            case GLFW_KEY_2:
+                pointlight.z+=10;
+                break;
+            case GLFW_KEY_4:
+                pointlight.x-=10;
+                break;
+            case GLFW_KEY_6:
+                pointlight.x+=10;
+                break;
+            case GLFW_KEY_1:
+                pointlight.y+=10;
+                break;
+            case GLFW_KEY_0:
+                pointlight.y-=10;
                 break;
         }
     }
