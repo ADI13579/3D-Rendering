@@ -4,7 +4,7 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(0,0,0);
+coordinate3f pointlight(0,SCREEN_HEIGHT/2,0);
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -24,7 +24,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float lastX = SCREEN_WIDTH / 2.0;
 float lastY = SCREEN_HEIGHT / 2.0;
-float fov = 45.0f;
+float fov = 100.0f;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -85,17 +85,17 @@ void CameraView(std::vector<plane_t>& planes)
 
 int main()
 {
-
+    coordinate3f scalefactor;
     coordinate3f pivot;
     coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
 
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
-    std::string model = "test";
-    //std::string model = "model";
+    //std::string model = "test";
+    std::string model = "model";
 
-    std::vector<plane_t> planes = parser::parse(model,tex);
-
+    std::vector<plane_t> planes = parser::parse(model,tex,scalefactor);
+    
     if (!glfwInit())
         return -1;
 
@@ -125,7 +125,8 @@ int main()
             pivot = pivot + j;
 
     pivot = pivot / (planes.size() * 3);
-
+    texture skytex("desert-sky-1.jpg");
+    skytex.load();
     std::vector<plane_t> processed;
     std::cout << planes.size();
 
@@ -162,25 +163,19 @@ int main()
         //backface_elimination(processed);
         CameraView(processed);
 
-        //method 2
-        //===========================================================
-       /* for (auto i = 0; i < processed.size(); i++)
-        {
-            processed[i].diffuseIntensities(pointlight);
-            processed[i].rotate(angle,pivot);
-            processed[i].makeCalculations();
-            processed[i].specularIntensities(mycamera.Position);
-        }*/
-        //=============================================================
-        
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
+        for (int i = 0; i < SCREEN_HEIGHT; i++)
+            for (int j = 0; j < SCREEN_WIDTH; j++)
+                pixelbuffer[i][j] = skytex.imagedata[i][j];
+
         std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
         for (auto i : processed)
+        {
+         //   i.scale(scalefactor.x, scalefactor.y, scalefactor.z);
             i.draw(0, Zbuffer, pixelbuffer);
-
+        }
 
         //till this point colour of pixels are maintained in a 2D array called pixelbuffer
-
         for (int y = 0; y < pixelbuffer.size(); y++)
         {
             for (int x = 0; x < pixelbuffer[0].size(); x++)

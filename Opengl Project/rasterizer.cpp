@@ -25,9 +25,7 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
             I[i].z = I[i].z > 1 ? 1 : I[i].z;
         }
     }
-
 }
-
 
 void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
 {
@@ -42,7 +40,6 @@ void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
         surface position
 
         Because V and R are unit vectors in the viewing and specular-reflection directions
-
    */
    //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
     for (int i = 0; i < 3; i++)
@@ -52,7 +49,7 @@ void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
         coordinate3f V = !(v[i] - camera);
 
         float a = V ^ R;
-        if (a > 0) 
+        if (a >= 0) 
         {
             I[i] = I[i] + ks * (pow(a, Ns));
             I[i].x = I[i].x > 1 ? 1 : I[i].x;
@@ -64,14 +61,6 @@ void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
 
 void plane_t::ambientIntensities(float Ia)
 {
-    /*
-         H = unitvec(L + V)
-                    L=point to light
-                    V=point to camera;
-        I = Idiff + Ispec
-            = ka Ia + kd Il(N . L) + ks Il(N . H)^ns
-    */
-    //Ia and Id is taken as 1 for now but needs to be a 3coordinate vector
     for (int i = 0; i < 3; i++)
     {
         I[i] = I[i] + kd * Ia;
@@ -86,8 +75,8 @@ void plane_t::attenuate(coordinate3f pointlight)
     for (int i = 0; i < 3; i++)
     {
         float d = v[i].distance(pointlight)/1000;
-        float k = 1 + 2 * d + 3 * d *d;
-        I[i] = I[i] * k;
+        float k = 0.5 + 0.01 * d + 0.1 * d *d;
+        I[i] = I[i] / k;
     }
 }
 
@@ -97,7 +86,7 @@ void plane_t::print()
     simpleplane::print();
 }
 
-float plane_t::GetIntersectPoint(coordinate2i a, coordinate2i b, int y)
+float plane_t::GetIntersectPoint(coordinate3f a, coordinate3f b, int y)
 {
     if (a.y > b.y)
         std::swap(a, b);
@@ -139,13 +128,8 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
     coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]) * 1000;
     float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
 
-    std::vector<coordinate2f> t = {
-                                    coordinate2f(v[0].x,v[0].y),
-                                    coordinate2f(v[1].x,v[1].y),
-                                    coordinate2f(v[2].x,v[2].y),
-    };
-
-    for (int y = int(t[0].y + 0.5); y <= int(t[2].y + 0.5); y++)
+    
+    for (int y = int(v[0].y + 0.5); y <= int(v[2].y + 0.5); y++)
     {
 
         if (y < 0)
@@ -154,12 +138,10 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
             break;
 
 
-        coordinate3f temp(0, y);
-        
         std::vector<float> point = {
-                     GetIntersectPoint(t[0], t[1], y), 
-                     GetIntersectPoint(t[1], t[2], y),
-                     GetIntersectPoint(t[2], t[0], y),
+                     GetIntersectPoint(v[0], v[1], y), 
+                     GetIntersectPoint(v[1], v[2], y),
+                     GetIntersectPoint(v[2], v[0], y),
         };
 
         std::sort(point.begin(), point.end());
@@ -178,37 +160,30 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
 
         for (int x = int((X[0]+0.5)); x <= int(X[1]+0.5); x++)
         {
-            temp.x = x;
-            temp.z = -((D - x * A.x - y * A.y) / A.z);
+            float z = -((D - x * A.x - y * A.y) / A.z);
             
-            if (Zbuffer[y][x] <= (temp.z))
+            if (Zbuffer[y][x] <= z)
             {
-                Zbuffer[y][x] = temp.z;
+                Zbuffer[y][x] = z;
                 float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
                 float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
                 float W2 = 1.0 - W0 - W1;
-
+       
                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-
+                coordinate2f point(x, y);
                 if (!tex)
-                    putpixel(temp, color, pixelbuffer);
+                    putpixel(point, color, pixelbuffer);
                 else
                 {
-                    //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
+                   //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
+                   //coordinate2f te = vt[0]*(1/v[0].z) * W0 + vt[1]*(1/v[1].z) * W1 + vt[2]*(1/v[2].z) * W2; 
+                   //float Z=W0*(1/v[0].z) + W1*(1/v[1].z) + W2*(1/v[2].z);
+                  // te = te *(1/ Z);
+                    //prespective correction not working why?                   
+                    coordinate2f te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
 
-                 /* 
-                    W0 /=v[0].z;
-                    W1 /=v[1].z;
-                    W2 /=v[2].z;
-                 */
-
-                   coordinate2f te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
-                   float Z=W0 + W1 + W2;
-                   //te = te *(1/ Z);
-
-
-                    te.x = fabs((te.x - floor(te.x)) * tex->width);
-                    te.y = fabs((te.y - floor(te.y)) * tex->height);
+                   te.x = fabs((te.x - floor(te.x)) * tex->width);
+                   te.y = fabs((te.y - floor(te.y)) * tex->height);
 
 
                     /*
@@ -226,28 +201,23 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                     coordinate3f col(1, 1, 1);
                     if (te.x > 0 && te.x < tex->width - 1 && te.y>0 && te.y < tex->height - 1)
                     {
-                        coordinate3f z[2][2] = {
+                        coordinate3f P[2][2] = {
                                                 {tex->imagedata[int(te.y - 1)][int(te.x - 1)],tex->imagedata[int(te.y + 1)][int(te.x - 1)]},
                                                 {tex->imagedata[int(te.y - 1)][int(te.x + 1)],tex->imagedata[int(te.y + 1)][int(te.x + 1)]}
                         };
                         int x = te.x - floor(te.x);
                         int y = te.y - floor(te.y);
-                        col = z[0][0] * (1 - x) * (1 - y) + z[1][0] * x * (1 - y) + z[0][1] * (1 - x) * y + z[1][1] * x * y;
+                        col = P[0][0] * (1 - x) * (1 - y) + P[1][0] * x * (1 - y) + P[0][1] * (1 - x) * y + P[1][1] * x * y;
                     }
                     else if(int(te.x)==0 && te.y<tex->height && te.y>0)
-                    {
                         col = tex->imagedata[te.y][te.x];
-                    }
                     else if(int(te.y)==tex->height-1 && te.x<tex->width && te.x>0)
-                    {
                         col = tex->imagedata[te.y][te.x];
-                    }
-
-
+                    
                     color.x *= col.x;
                     color.y *= col.y;
                     color.z *= col.z;
-                    putpixel(temp, color, pixelbuffer);
+                    putpixel(point, color, pixelbuffer);
                 }
             }
             if (MESH)

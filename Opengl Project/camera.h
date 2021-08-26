@@ -14,10 +14,9 @@ static void show_matrix(float mat[4][4]) {
             std::cout << mat[i][j] << " ";
         std::cout << "\n";
     }
-
 }
-///////////////////////////////////////////////////
 
+///////////////////////////////////////////////////
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum Camera_Movement {
     FORWARD,
@@ -31,7 +30,7 @@ const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SPEED = 20.0f;
 const float SENSITIVITY = 0.1f;
-const float ZOOM = 30.0;
+const float ZOOM = 50.0;
 //Pi defined multiple files
 
 

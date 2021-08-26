@@ -234,7 +234,6 @@ public:
 		plane.makeCalculations();
 
 		return plane;
-
 	}
 
 

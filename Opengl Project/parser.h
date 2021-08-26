@@ -66,7 +66,7 @@ namespace parser
             return face;
         }
 
-        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex)
+        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex,coordinate3f &scalefactor)
         {
             std::vector<plane_t> planes;
             std::vector<coordinate3f> vertexes;
@@ -277,17 +277,19 @@ namespace parser
                         };
                     }
 
-                    float fac = SCREEN_WIDTH/4;
-                
-                    p.scale(fac,ratioyx*fac,ratiozx* fac);
-                    //p.translate(coordinate3f(SCREEN_WIDTH/2, 0, -500));
+                    float fac = SCREEN_WIDTH;
+
+                    p.scale(fac, ratioyx* fac, ratiozx* fac);
+                    
+                    scalefactor.x = fac;
+                    scalefactor.y=ratioyx* fac;
+                    scalefactor.z=ratiozx* fac;
 
                     plane_t t(p, materialBind);
                     t.makeCalculations();
                     planes.push_back(t);
                  }
             }
-            std::cout<<planes.capacity();
             std::cout << "Triangles Recorded" << planes.size()<<std::endl;
             return planes;
         }
