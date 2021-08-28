@@ -6,9 +6,9 @@ class simpleplane
 public:
     simpleplane()
     {
-        v.resize(3);
-        vt.resize(3);
-        vn.resize(3);
+        v.resize(3,0);
+        vt.resize(3,0);
+        vn.resize(3,0);
     }
     //To be taken from the .obj file
     //=================================

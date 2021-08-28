@@ -27,6 +27,23 @@
 //parser to load obj files already divided into triangles
 namespace parser
 {
+        void managetex(coordinate2f& vt)
+        {
+            double intpart;
+            if (vt.x > 1)
+            {
+                vt.x = modf(vt.x, &intpart);
+                if (int(intpart * 10) == 0)
+                    vt.x = 1;
+            }
+            if (vt.y > 1)
+            {
+                vt.y = modf(vt.x, &intpart);
+                if (int(intpart * 10) == 0)
+                    vt.y = 1;
+            }
+        }
+
         void transpose(std::vector<std::vector<int> >& b)
         {
             if (b.size() == 0)
@@ -151,11 +168,12 @@ namespace parser
             std::fstream mtl(filename + ".mtl", std::ios::in);
             for (auto i : materialids)
             {
-                material temp;
+                bool found=0;
                 while (std::getline(mtl, lineStr))
                 {
                     if (lineStr == "newmtl " + i)
                     {
+                        material temp;
                         temp.id = i;
                         getline(mtl, lineStr);
                         lineSS = std::istringstream(lineStr);
@@ -226,10 +244,15 @@ namespace parser
                                 }
                             }
                         }
+                        found = 1;
                         materials.push_back(temp);
                         break;
                     }
                 }
+
+                if (!found)
+                    materials.push_back(material());
+
                 mtl.clear();
                 mtl.seekg(0);
             }

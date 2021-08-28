@@ -91,11 +91,15 @@ int main()
 
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
-    //std::string model = "test";
-    std::string model = "model";
+    std::string model = "temp";
+    //std::string model = "model";
 
     std::vector<plane_t> planes = parser::parse(model,tex,scalefactor);
-    
+    if (planes.size() == 0)
+    {
+        std::cout << "Nothing to draw";
+        return -1;
+    }
     if (!glfwInit())
         return -1;
 
@@ -164,16 +168,11 @@ int main()
         CameraView(processed);
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
-        for (int i = 0; i < SCREEN_HEIGHT; i++)
-            for (int j = 0; j < SCREEN_WIDTH; j++)
-                pixelbuffer[i][j] = skytex.imagedata[i][j];
+
 
         std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
         for (auto i : processed)
-        {
-         //   i.scale(scalefactor.x, scalefactor.y, scalefactor.z);
             i.draw(0, Zbuffer, pixelbuffer);
-        }
 
         //till this point colour of pixels are maintained in a 2D array called pixelbuffer
         for (int y = 0; y < pixelbuffer.size(); y++)

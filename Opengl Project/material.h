@@ -17,7 +17,11 @@ public:
     coordinate3f Ni;
     texture* tex;
     float d;
-    material() { tex = 0;}
+    material() {
+        id = "null";
+        kd = coordinate3f(1, 1, 1); 
+        tex = 0; 
+    }
     //===============================================
     void print()
     {

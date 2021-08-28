@@ -39,27 +39,6 @@ public:
 
         centroid = _p.centroid;
         centroidNormal = _p.centroidNormal;
-
-        if (tex && vt.size() == 3)
-        {
-            bool normalizetex = 0;
-            if (vt[0].x > 1)
-            {
-                
-                for (auto i : vt) {
-                    normalizetex = normalizetex || (i.x > 1) || (i.y > 1);
-                }
-
-                if (normalizetex)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        vt[i].x /= tex->width;
-                        vt[i].y /= tex->height;
-                    }
-                }
-            }
-        }
     }
 
     //Gets the x of intersect point return INT_MAX if the line is vertical 

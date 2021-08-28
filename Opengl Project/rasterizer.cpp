@@ -121,6 +121,7 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
     //this part seems to be efficient if breshenham algorithm is used 
     sort();//this must be done befor calculating div
     //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
+
     float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
     if (div == 0)
         return;
@@ -128,10 +129,8 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
     coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]) * 1000;
     float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
 
-    
     for (int y = int(v[0].y + 0.5); y <= int(v[2].y + 0.5); y++)
     {
-
         if (y < 0)
             y = 0;
         else if (y > SCREEN_HEIGHT)
@@ -157,6 +156,11 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
         int X[] = { point[0],point[1] };
         X[0] = X[0] < 0 ? 0 : X[0];
         X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];
+        //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
+        bool AVOID_PRES_CORR = 0;
+        for (auto i : v)
+            if (abs(int(i.z)) < 1)
+                AVOID_PRES_CORR = 1;
 
         for (int x = int((X[0]+0.5)); x <= int(X[1]+0.5); x++)
         {
@@ -165,6 +169,10 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
             if (Zbuffer[y][x] <= z)
             {
                 Zbuffer[y][x] = z;
+                /*float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
+                float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
+                float W2 = 1.0 - W0 - W1;*/
+                
                 float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
                 float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
                 float W2 = 1.0 - W0 - W1;
@@ -175,19 +183,23 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                     putpixel(point, color, pixelbuffer);
                 else
                 {
+                    coordinate2f te;
                    //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
-                   //coordinate2f te = vt[0]*(1/v[0].z) * W0 + vt[1]*(1/v[1].z) * W1 + vt[2]*(1/v[2].z) * W2; 
-                   //float Z=W0*(1/v[0].z) + W1*(1/v[1].z) + W2*(1/v[2].z);
-                  // te = te *(1/ Z);
-                    //prespective correction not working why?                   
-                    coordinate2f te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
+                    if (!AVOID_PRES_CORR)
+                    {
+                        te = vt[0] * (1 / v[0].z) * W0 + vt[1] * (1 / v[1].z) * W1 + vt[2] * (1 / v[2].z) * W2;
+                        float Z = W0 * (1 / v[0].z) + W1 * (1 / v[1].z) + W2 * (1 / v[2].z);
+                        te = te * (1 / Z);
+                    }
+                    else
+                        te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
 
-                   te.x = fabs((te.x - floor(te.x)) * tex->width);
-                   te.y = fabs((te.y - floor(te.y)) * tex->height);
+                   te.x = ((te.x - floor(te.x)) * (tex->width-1));
+                   te.y = ((te.y - floor(te.y)) * (tex->height-1));
 
 
                     /*
-                        for bilinear interpolation however this doesn't show much effect
+                        for bilinear interpolation
                         Suppose that you want to interpolate on the unit square.Assume you know the values of a continuous function at the corners of the square :
                         z00 is the function value at(0, 0), the lower left corner
                         z01 is the function value at(0, 1), the upper left corner
@@ -199,6 +211,7 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                     */
                     
                     coordinate3f col(1, 1, 1);
+
                     if (te.x > 0 && te.x < tex->width - 1 && te.y>0 && te.y < tex->height - 1)
                     {
                         coordinate3f P[2][2] = {
@@ -209,11 +222,9 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
                         int y = te.y - floor(te.y);
                         col = P[0][0] * (1 - x) * (1 - y) + P[1][0] * x * (1 - y) + P[0][1] * (1 - x) * y + P[1][1] * x * y;
                     }
-                    else if(int(te.x)==0 && te.y<tex->height && te.y>0)
+                    else
                         col = tex->imagedata[te.y][te.x];
-                    else if(int(te.y)==tex->height-1 && te.x<tex->width && te.x>0)
-                        col = tex->imagedata[te.y][te.x];
-                    
+            
                     color.x *= col.x;
                     color.y *= col.y;
                     color.z *= col.z;
