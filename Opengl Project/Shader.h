@@ -36,6 +36,7 @@ class Shader {
 	float projectionMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float modelView[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float normalModelView[4][4];
+	float scale[4][4] =  {{1.5*SCREEN_WIDTH,0,0,0},{0,1.5*SCREEN_HEIGHT,0,0},{0,0,1,0},{0,0,0,1}} ; // inorder to map to viewPort 
 public:
 	Shader() {
 
@@ -155,10 +156,24 @@ public:
 			float resProj[4][1];
 			matMulVec(projectionMat, modelViewVector, resProj);
 
+		coordinate3f temp = coordinate3f(resProj[0][0]/ float(resProj[3][0]), resProj[1][0]/ float(resProj[3][0]), resProj[2][0]/ float(resProj[3][0]));
 
+			// get the view port co-ordinate;
+			float view[4][1];
+			float tmp[4][1];
+			tmp[0][0] = temp.x;
+			tmp[1][0] = temp.y;
+			tmp[2][0] = temp.z;
+			tmp[3][0] = 1;
+
+			matMulVec(scale, tmp, view);
+			
+		
+		/*std::cout << temp.x <<","<< temp.y << "," << temp.z;*/
+		return coordinate3f(view[0][0], view[1][0], view[2][0]);
+		//return coordinate3f(resProj[0][0] , resProj[1][0] , resProj[2][0] );
 
 		
-		return coordinate3f(resProj[0][0], resProj[1][0], resProj[2][0]);
 		//return vertex;
 
 
@@ -252,3 +267,4 @@ public:
 
 
 };
+

@@ -3,8 +3,11 @@
 #include"coordinate.h"
 #include"camera.h"
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+//#define SCREEN_WIDTH 1000
+//#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
 #define PI 3.14159
 
 static void putpixel(coordinate2f pixel, coordinate3f color,std::vector<std::vector<coordinate3f>> &pixelbuffer)

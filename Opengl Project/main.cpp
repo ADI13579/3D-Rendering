@@ -10,14 +10,14 @@ coordinate3f pointlight(0,SCREEN_HEIGHT/2,0);
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
 void sort(std::vector<plane_t>& bar);
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void keyCallback(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 GLfloat rotationX = 0.0f;
 GLfloat rotationY = 0.0f;
 
-Camera mycamera(coordinate3f(0, 0, 0));
+Camera mycamera;
 Shader myshader;
 bool firstMouse = true;
 float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
@@ -110,7 +110,7 @@ int main()
         return -1;
     }
 
-    glfwSetKeyCallback(window, keyCallback);
+    //glfwSetKeyCallback(window, keyCallback);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -147,8 +147,12 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        //input 
+        keyCallback(window);
+        //----------
+
         // set the projection matrix;
-        float projMat[4][4] = { {0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0} }; // initialization, contains no meaning at all 
+        float projMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} }; // initialization, contains no meaning at all 
         mycamera.GetPerspectiveMatrix(radian(mycamera.Zoom), (float)screenWidth / (float)screenHeight, 0.1, 100, projMat);
         myshader.setMat("projection", projMat);
         //show_matrix(projMat);
@@ -157,9 +161,11 @@ int main()
         float modelMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
         myshader.setMat("model", modelMat);
         // set the view matrix
-        float viewMat[4][4];  //= { {1,3,2,0},{3,1,4,0},{5,0,1,7},{2,0,1,1} };
+        float viewMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
+        //std::cout << "x:" << mycamera.Front.x << "y:" << mycamera.Front.y << "z:" << mycamera.Front.z;
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
+        //show_matrix(viewMat);
         for (int i = 0; i < processed.size(); i++)
             processed[i].rotate(angle, pivot);
 
@@ -187,7 +193,7 @@ int main()
         
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
+        //std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
     }
     glEnd();
     glDisable(GL_POINT_SMOOTH);
@@ -195,49 +201,106 @@ int main()
     return 0;
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void keyCallback(GLFWwindow* window)
 {
     const GLfloat rotationSpeed = 5;
 
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        switch (key)
-        {
-            case GLFW_KEY_A:
-                std::cout << "deltatime" << deltaTime;
-                mycamera.ProcessKeyboard(LEFT, deltaTime * 10);
-                break;
-            case GLFW_KEY_D:
-                mycamera.ProcessKeyboard(RIGHT, deltaTime * 10);
-                break;
-            case GLFW_KEY_R:
-                angle++;
-                break;
-            case GLFW_KEY_T:
-                angle--;
-                break;
-            case GLFW_KEY_8:
-                pointlight.z-=10;
-                pointlight.print();
-                break;
-            case GLFW_KEY_2:
-                pointlight.z+=10;
-                break;
-            case GLFW_KEY_4:
-                pointlight.x-=10;
-                break;
-            case GLFW_KEY_6:
-                pointlight.x+=10;
-                break;
-            case GLFW_KEY_1:
-                pointlight.y+=10;
-                break;
-            case GLFW_KEY_0:
-                pointlight.y-=10;
-                break;
-        }
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        //std::cout << "A pressed";
+        mycamera.ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        //std::cout << "A pressed";
+        mycamera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        //std::cout << "A pressed";
+        mycamera.ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        //std::cout << "A pressed";
+        mycamera.ProcessKeyboard(BACKWARD, deltaTime);
+    }
+
+
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    {
+        angle++;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+    {
+        angle--;
+    }
+
+
+
+
+
+
+
+    switch (4)
+    {
+
+    case GLFW_KEY_ESCAPE:
+        glfwSetWindowShouldClose(window, true);
+        break;
+
+    case GLFW_KEY_A:
+        //std::cout << "deltatime" << deltaTime;
+        mycamera.ProcessKeyboard(LEFT, deltaTime);
+        break;
+    case GLFW_KEY_D:
+        mycamera.ProcessKeyboard(RIGHT, deltaTime);
+        break;
+
+    case GLFW_KEY_W:
+        //std::cout << "deltatime" << deltaTime;
+        std::cout << "PositionW" << mycamera.Position.x << "," << mycamera.Position.y << "," << mycamera.Position.z;;
+        mycamera.ProcessKeyboard(FORWARD, deltaTime);
+
+        break;
+    case GLFW_KEY_S:
+        mycamera.ProcessKeyboard(BACKWARD, deltaTime);
+        break;
+    case GLFW_KEY_R:
+        angle++;
+        break;
+    case GLFW_KEY_T:
+        angle--;
+        break;
+    case GLFW_KEY_8:
+        pointlight.z -= 10;
+        pointlight.print();
+        break;
+    case GLFW_KEY_2:
+        pointlight.z += 10;
+        break;
+    case GLFW_KEY_4:
+        pointlight.x -= 10;
+        break;
+    case GLFW_KEY_6:
+        pointlight.x += 10;
+        break;
+    case GLFW_KEY_1:
+        pointlight.y += 10;
+        break;
+    case GLFW_KEY_0:
+        pointlight.y -= 10;
+        break;
     }
 }
+
 
 
 // glfw: whenever the mouse moves, this callback is called

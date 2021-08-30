@@ -30,6 +30,10 @@ public:
     coordinate3f operator - (coordinate3f t) {
         return coordinate3f(x - t.x, y - t.y, z - t.z);
     }
+
+    coordinate3f operator - () {
+        return coordinate3f(-x,-y,-z);
+    }
     GLfloat operator ^ (coordinate3f t) {
         return (x * t.x+y * t.y+z * t.z);
     }
