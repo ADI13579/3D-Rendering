@@ -224,7 +224,6 @@ public:
     }
 
 private:
-
     float radians(float deg) {
         return PI / 180 * deg;
     }

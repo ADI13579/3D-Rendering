@@ -74,7 +74,7 @@ void plane_t::attenuate(coordinate3f pointlight)
 {
     for (int i = 0; i < 3; i++)
     {
-        float d = v[i].distance(pointlight)/1000;
+        float d = v[i].distance(pointlight)/10000;
         float k = 0.5 + 0.01 * d + 0.1 * d *d;
         I[i] = I[i] / k;
     }
@@ -156,12 +156,8 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
         int X[] = { point[0],point[1] };
         X[0] = X[0] < 0 ? 0 : X[0];
         X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];
-        //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
-        bool AVOID_PRES_CORR = 0;
-        for (auto i : v)
-            if (abs(int(i.z)) < 1)
-                AVOID_PRES_CORR = 1;
 
+        //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
         for (int x = int((X[0]+0.5)); x <= int(X[1]+0.5); x++)
         {
             float z = -((D - x * A.x - y * A.y) / A.z);
@@ -169,31 +165,21 @@ void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vec
             if (Zbuffer[y][x] <= z)
             {
                 Zbuffer[y][x] = z;
-                /*float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
-                float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
-                float W2 = 1.0 - W0 - W1;*/
-                
-                float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
-                float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
+                float W0 = fabs(((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div);
+                float W1 = fabs(((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div);
                 float W2 = 1.0 - W0 - W1;
        
                 coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
                 coordinate2f point(x, y);
+
                 if (!tex)
                     putpixel(point, color, pixelbuffer);
                 else
-                {
-                    coordinate2f te;
+                { 
                    //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
-                    if (!AVOID_PRES_CORR)
-                    {
-                        te = vt[0] * (1 / v[0].z) * W0 + vt[1] * (1 / v[1].z) * W1 + vt[2] * (1 / v[2].z) * W2;
-                        float Z = W0 * (1 / v[0].z) + W1 * (1 / v[1].z) + W2 * (1 / v[2].z);
-                        te = te * (1 / Z);
-                    }
-                    else
-                        te = vt[0] * W0 + vt[1] * W1 + vt[2] * W2;
-
+                    coordinate3f te = vt[0]/ v[0].z * W0 + vt[1]/ v[1].z * W1 + vt[2] *1 / v[2].z * W2;
+                   te = te / te.z;
+                    
                    te.x = ((te.x - floor(te.x)) * (tex->width-1));
                    te.y = ((te.y - floor(te.y)) * (tex->height-1));
 

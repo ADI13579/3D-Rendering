@@ -87,7 +87,7 @@ namespace parser
         {
             std::vector<plane_t> planes;
             std::vector<coordinate3f> vertexes;
-            std::vector<coordinate2f> textures;
+            std::vector<coordinate3f> textures;
             std::vector<coordinate3f> normal;
             std::vector<material> materials;
             std::string data, lineStr;
@@ -120,7 +120,7 @@ namespace parser
                 {
                     float u = 0, v = 0;
                     lineSS >> u >> v;
-                    textures.push_back(coordinate2f(u, v));
+                    textures.push_back(coordinate3f(u, v,1));
                 }
                 else if (lineType == "vn")
                 {
@@ -161,7 +161,6 @@ namespace parser
                     count++;
             }
            
-            
             float ratioyx = scale.x/scale.y;
             float ratiozx = scale.x / scale.z;
 
@@ -291,7 +290,7 @@ namespace parser
                               normal[sep[2][2]],
                         };
                     }
-                    if (textures.size() != 0 && sep[1][0] != -1)
+                    if(textures.size() != 0 && sep[1][0] != -1)
                     {
                         p.vt = {
                                    textures[sep[1][0]],

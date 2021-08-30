@@ -39,6 +39,8 @@ public:
 
         centroid = _p.centroid;
         centroidNormal = _p.centroidNormal;
+        if (tex)
+            kd = coordinate3f(1, 1, 1);
     }
 
     //Gets the x of intersect point return INT_MAX if the line is vertical 

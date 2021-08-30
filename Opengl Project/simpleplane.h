@@ -13,7 +13,7 @@ public:
     //To be taken from the .obj file
     //=================================
     std::vector<coordinate3f> v;//vertices of plane
-    std::vector<coordinate2f> vt;//texture mapped to the above vertices if any
+    std::vector<coordinate3f> vt;//texture mapped to the above vertices if any
     std::vector<coordinate3f> vn;//avg unit normal of the vertices above
     //======================================
     //to be calculated
