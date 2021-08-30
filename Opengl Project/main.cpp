@@ -4,7 +4,7 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(0,SCREEN_HEIGHT/2,0);
+coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT,100);
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -175,7 +175,6 @@ int main()
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
 
-
         std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
         for (auto i : processed)
             i.draw(0, Zbuffer, pixelbuffer);
@@ -189,8 +188,7 @@ int main()
                     glVertex2i(x,y);
             }
         }
-        
-        
+       
         glfwSwapBuffers(window);
         glfwPollEvents();
         //std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
