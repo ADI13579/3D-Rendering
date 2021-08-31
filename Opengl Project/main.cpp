@@ -4,13 +4,13 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT,100);
+coordinate3f pointlight(0,SCREEN_HEIGHT/2,0);
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
 void sort(std::vector<plane_t>& bar);
 
-void keyCallback(GLFWwindow* window);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
@@ -114,6 +114,7 @@ int main()
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, keyCallback);
 
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
@@ -148,7 +149,7 @@ int main()
         lastFrame = currentFrame;
 
         //input 
-        keyCallback(window);
+        //keyCallback(window);
         //----------
 
         // set the projection matrix;
@@ -175,6 +176,7 @@ int main()
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
 
+
         std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
         for (auto i : processed)
             i.draw(0, Zbuffer, pixelbuffer);
@@ -188,7 +190,8 @@ int main()
                     glVertex2i(x,y);
             }
         }
-       
+        
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
         //std::cout << "FPS:" << 1 / (glfwGetTime() - currentFrame) << std::endl;
@@ -199,55 +202,12 @@ int main()
     return 0;
 }
 
-void keyCallback(GLFWwindow* window)
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     const GLfloat rotationSpeed = 5;
+    const float lightMovement = 20;
 
-
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, true);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        //std::cout << "A pressed";
-        mycamera.ProcessKeyboard(LEFT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        //std::cout << "A pressed";
-        mycamera.ProcessKeyboard(RIGHT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        //std::cout << "A pressed";
-        mycamera.ProcessKeyboard(FORWARD, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        //std::cout << "A pressed";
-        mycamera.ProcessKeyboard(BACKWARD, deltaTime);
-    }
-
-
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    {
-        angle++;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-    {
-        angle--;
-    }
-
-
-
-
-
-
-
-    switch (4)
+    switch (key)
     {
 
     case GLFW_KEY_ESCAPE:
@@ -264,9 +224,8 @@ void keyCallback(GLFWwindow* window)
 
     case GLFW_KEY_W:
         //std::cout << "deltatime" << deltaTime;
-        std::cout << "PositionW" << mycamera.Position.x << "," << mycamera.Position.y << "," << mycamera.Position.z;;
+        //std::cout << "PositionW" << mycamera.Position.x << "," << mycamera.Position.y << "," << mycamera.Position.z;;
         mycamera.ProcessKeyboard(FORWARD, deltaTime);
-
         break;
     case GLFW_KEY_S:
         mycamera.ProcessKeyboard(BACKWARD, deltaTime);
@@ -278,23 +237,25 @@ void keyCallback(GLFWwindow* window)
         angle--;
         break;
     case GLFW_KEY_8:
-        pointlight.z -= 10;
+        pointlight.z -= lightMovement;
+        std::cout << "8 pressed";
         pointlight.print();
         break;
     case GLFW_KEY_2:
-        pointlight.z += 10;
+        pointlight.z +=  lightMovement;
+
         break;
     case GLFW_KEY_4:
-        pointlight.x -= 10;
+        pointlight.x -=  lightMovement;
         break;
     case GLFW_KEY_6:
-        pointlight.x += 10;
+        pointlight.x +=  lightMovement;
         break;
     case GLFW_KEY_1:
-        pointlight.y += 10;
+        pointlight.y +=  lightMovement;
         break;
     case GLFW_KEY_0:
-        pointlight.y -= 10;
+        pointlight.y -=  lightMovement;
         break;
     }
 }
