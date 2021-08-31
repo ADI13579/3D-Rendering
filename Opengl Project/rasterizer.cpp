@@ -116,147 +116,112 @@ float plane_t::GetIntersectPoint(coordinate3f a, coordinate3f b, int y)
 }
 
 //RASTERIZING PART
-void plane_t::draw(bool MESH, std::vector<std::vector<float>>& Zbuffer, std::vector<std::vector<coordinate3f>>& pixelbuffer)
+void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
-    //this part seems to be efficient if breshenham algorithm is used 
-    sort();//this must be done befor calculating div
-    //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
-
-    float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
-    if (div == 0)
-        return;
-
-    coordinate3f A = (v[0] - v[1]) * (v[0] - v[2]) * 1000;
-    float D = A.x * v[0].x + A.y * v[0].y + A.z * v[0].z;
-
-    for (int y = int(v[0].y + 0.5); y <= int(v[2].y + 0.5); y++)
-    {
-        if (y < 0)
-            y = 0;
-        else if (y > SCREEN_HEIGHT)
-            break;
-
-
-        std::vector<float> point = {
-                     GetIntersectPoint(v[0], v[1], y), 
-                     GetIntersectPoint(v[1], v[2], y),
-                     GetIntersectPoint(v[2], v[0], y),
-        };
-
-        std::sort(point.begin(), point.end());
-        if (point[point.size() - 1] == INT_MAX)
-            point.pop_back();
-
-        if (point.size() > 2)
-        {
-            point[1] = point[2];
-            point.pop_back();
-        }
-
-        int X[] = { point[0],point[1] };
-        X[0] = X[0] < 0 ? 0 : X[0];
-        X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];
-
-        //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
-        for (int x = int((X[0]+0.5)); x <= int(X[1]+0.5); x++)
-        {
-            float z = -((D - x * A.x - y * A.y) / A.z);
-            
-            if (Zbuffer[y][x] <= z)
-            {
-                Zbuffer[y][x] = z;
-                float W0 = fabs(((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div);
-                float W1 = fabs(((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div);
-                float W2 = 1.0 - W0 - W1;
-       
-                coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
-                coordinate2f point(x, y);
-
-                if (!tex)
-                    putpixel(point, color, pixelbuffer);
-                else
-                { 
-                   //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
-                    coordinate3f te = vt[0]/ v[0].z * W0 + vt[1]/ v[1].z * W1 + vt[2] *1 / v[2].z * W2;
-                   te = te / te.z;
-                    
-                   te.x = ((te.x - floor(te.x)) * (tex->width-1));
-                   te.y = ((te.y - floor(te.y)) * (tex->height-1));
-
-
-                    /*
-                        for bilinear interpolation
-                        Suppose that you want to interpolate on the unit square.Assume you know the values of a continuous function at the corners of the square :
-                        z00 is the function value at(0, 0), the lower left corner
-                        z01 is the function value at(0, 1), the upper left corner
-                        z10 is the function value at(1, 0), the lower right corner
-                        z11 is the function value at(1, 1), the upper right corner
-
-                        If(x, y) is any point inside the unit square, the interpolation at that point is the following weighted average of the values at the four corners :
-                        F(x, y) = z00 * (1 - x) * (1 - y) + z10 * x * (1 - y) + z01 * (1 - x) * y + z11 * x * y
-                    */
-                    
-                    coordinate3f col(1, 1, 1);
-
-                    if (te.x > 0 && te.x < tex->width - 1 && te.y>0 && te.y < tex->height - 1)
-                    {
-                        coordinate3f P[2][2] = {
-                                                {tex->imagedata[int(te.y - 1)][int(te.x - 1)],tex->imagedata[int(te.y + 1)][int(te.x - 1)]},
-                                                {tex->imagedata[int(te.y - 1)][int(te.x + 1)],tex->imagedata[int(te.y + 1)][int(te.x + 1)]}
-                        };
-                        int x = te.x - floor(te.x);
-                        int y = te.y - floor(te.y);
-                        col = P[0][0] * (1 - x) * (1 - y) + P[1][0] * x * (1 - y) + P[0][1] * (1 - x) * y + P[1][1] * x * y;
-                    }
-                    else
-                        col = tex->imagedata[te.y][te.x];
-            
-                    color.x *= col.x;
-                    color.y *= col.y;
-                    color.z *= col.z;
-                    putpixel(point, color, pixelbuffer);
-                }
-            }
-            if (MESH)
-            {
-                putpixel(coordinate2f(X[0], y), coordinate3f(1, 0, 0), pixelbuffer);
-                putpixel(coordinate2f(X[1], y), coordinate3f(1, 0, 0), pixelbuffer);
-            }
-        }
-    }
-    //for mesh the above code cannot draw horizontal lines
-    if (MESH)
-    {
-        float y;
-        std::vector<float> points;
-        if (v[0].y == v[1].y)
-        {
-            y = v[0].y;
-            points = { v[0].x,v[1].x };
-        }
-        else if (v[1].y == v[2].y)
-        {
-            y = v[1].y;
-            points = { v[1].x,v[2].x };
-        }
-        if (points.size() != 0)
-        {
-            if (points[0] > points[1])
-                std::swap(points[0], points[1]);
-            for (int x = points[0]; x < points[1]; x++)
-            {
-                putpixel(coordinate2f(x, y), coordinate3f(1, 0, 0), pixelbuffer);
-            }
-        }
-    }
-    //since scan line method used for rasterizing already computes all points lying in edges Brshenham is not required if rasterized and mesh triangle needs to be displayed
-    // however only for mesh view breshenham is effective 
-      
-
-    /*if (MESH)
+    if (WIREFRAME)
     {
         Bresenham_Line(v[0], v[1], coordinate3f(0, 1, 1), pixelbuffer);
         Bresenham_Line(v[0], v[2], coordinate3f(0, 1, 1), pixelbuffer);
         Bresenham_Line(v[1], v[2], coordinate3f(0, 1, 1), pixelbuffer);
-    }*/
+    }
+    else
+    {
+        sort();//this must be done befor calculating div
+        //this is a common denominator for W0 and W1 expression of the barycentric interpolation method so calculated outside
+        float div = (v[1].y - v[2].y) * (v[0].x - v[2].x) + (v[2].x - v[1].x) * (v[0].y - v[2].y);
+        if (div == 0)//THIS MEANS THE TRIANGLE AREA IS 0
+            return;
+
+        for (int y = int(v[0].y + 0.5); y <= int(v[2].y + 0.5); y++)
+        {
+            if (y < 0)
+                y = 0;
+            else if (y > SCREEN_HEIGHT)
+                break;
+
+
+            std::vector<float> point = {
+                         GetIntersectPoint(v[0], v[1], y),
+                         GetIntersectPoint(v[1], v[2], y),
+                         GetIntersectPoint(v[2], v[0], y),
+            };
+
+            std::sort(point.begin(), point.end());
+            if (point[point.size() - 1] == INT_MAX)
+                point.pop_back();
+
+            if (point.size() > 2)
+            {
+                point[1] = point[2];
+                point.pop_back();
+            }
+
+            int X[] = { point[0],point[1] };
+            X[0] = X[0] < 0 ? 0 : X[0];//CLIPPING IF THE LEFT OF X LIES OUTSIDE WINDOW
+            X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];//CLIPPING IF RIGHT OF X LIES OUTSIDE WINDOW
+
+            //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
+            for (int x = int((X[0] + 0.5)); x <= int(X[1] + 0.5); x++)
+            {
+                float W0 = fabs(((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div);
+                float W1 = fabs(((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div);
+                float W2 = 1.0 - W0 - W1;
+
+                float Z = W0 / v[0].z + W1 / v[1].z + W2 / v[2].z;
+                float z = 1 / Z;
+
+                if (Zbuffer[y][x] <= z)
+                {
+                    Zbuffer[y][x] = z;
+                    coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
+                    coordinate2f point(x, y);
+
+                    if (!tex)
+                        putpixel(point, color, pixelbuffer);
+                    else
+                    {
+                        //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
+                        coordinate3f te = vt[0] / v[0].z * W0 + vt[1] / v[1].z * W1 + vt[2] * 1 / v[2].z * W2;
+                        te = te / te.z;
+
+                        te.x = ((te.x - floor(te.x)) * (tex->width - 1));
+                        te.y = ((te.y - floor(te.y)) * (tex->height - 1));
+
+
+                        /*
+                            for bilinear interpolation
+                            Suppose that you want to interpolate on the unit square.Assume you know the values of a continuous function at the corners of the square :
+                            z00 is the function value at(0, 0), the lower left corner
+                            z01 is the function value at(0, 1), the upper left corner
+                            z10 is the function value at(1, 0), the lower right corner
+                            z11 is the function value at(1, 1), the upper right corner
+
+                            If(x, y) is any point inside the unit square, the interpolation at that point is the following weighted average of the values at the four corners :
+                            F(x, y) = z00 * (1 - x) * (1 - y) + z10 * x * (1 - y) + z01 * (1 - x) * y + z11 * x * y
+                        */
+
+                        coordinate3f col(1, 1, 1);
+
+                        if (te.x > 0 && te.x < tex->width - 1 && te.y>0 && te.y < tex->height - 1)
+                        {
+                            coordinate3f P[2][2] = {
+                                                    {tex->imagedata[int(te.y - 1)][int(te.x - 1)],tex->imagedata[int(te.y + 1)][int(te.x - 1)]},
+                                                    {tex->imagedata[int(te.y - 1)][int(te.x + 1)],tex->imagedata[int(te.y + 1)][int(te.x + 1)]}
+                            };
+                            int x = te.x - floor(te.x);
+                            int y = te.y - floor(te.y);
+                            col = P[0][0] * (1 - x) * (1 - y) + P[1][0] * x * (1 - y) + P[0][1] * (1 - x) * y + P[1][1] * x * y;
+                        }
+                        else
+                            col = tex->imagedata[te.y][te.x];
+
+                        color.x *= col.x;
+                        color.y *= col.y;
+                        color.z *= col.z;
+                        putpixel(point, color, pixelbuffer);
+                    }
+                }
+            }
+        }
+    }
 }

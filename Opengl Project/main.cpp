@@ -4,7 +4,7 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT,100);
+coordinate3f pointlight(SCREEN_WIDTH/2,SCREEN_HEIGHT,0);
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -24,7 +24,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float lastX = SCREEN_WIDTH / 2.0;
 float lastY = SCREEN_HEIGHT / 2.0;
-float fov = 100.0f;
+float fov = 40.0f;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -170,7 +170,7 @@ int main()
             processed[i].rotate(angle, pivot);
 
         //method 1
-        //backface_elimination(processed);
+        backface_elimination(processed);
         CameraView(processed);
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
