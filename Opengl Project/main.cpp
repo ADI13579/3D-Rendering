@@ -170,7 +170,7 @@ int main()
             processed[i].rotate(angle, pivot);
 
         //method 1
-        backface_elimination(processed);
+        //backface_elimination(processed);
         CameraView(processed);
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));

@@ -170,9 +170,9 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
                 float Z = W0 / v[0].z + W1 / v[1].z + W2 / v[2].z;
                 float z = 1 / Z;
 
-                if (Zbuffer[y][x] <= z)
+                if (Zbuffer[y][x] <= Z)
                 {
-                    Zbuffer[y][x] = z;
+                    Zbuffer[y][x] = Z;
                     coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
                     coordinate2f point(x, y);
 
@@ -181,8 +181,8 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
                     else
                     {
                         //Resource for texture mapping->http://archive.gamedev.net/archive/reference/articles/article331.html
-                        coordinate3f te = vt[0] / v[0].z * W0 + vt[1] / v[1].z * W1 + vt[2] * 1 / v[2].z * W2;
-                        te = te / te.z;
+                        coordinate2f te = vt[0] / v[0].z * W0 + vt[1] / v[1].z * W1 + vt[2] * 1 / v[2].z * W2;
+                        te = te *z;
 
                         te.x = ((te.x - floor(te.x)) * (tex->width - 1));
                         te.y = ((te.y - floor(te.y)) * (tex->height - 1));
