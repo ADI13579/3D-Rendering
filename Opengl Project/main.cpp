@@ -88,13 +88,14 @@ int main()
     coordinate3f scalefactor;
     coordinate3f pivot;
     coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
+    std::vector<coordinate3f> vertices;
 
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
     std::string model = "temp";
     //std::string model = "model";
 
-    std::vector<plane_t> planes = parser::parse(model,tex,scalefactor);
+    std::vector<plane_t> planes = parser::parse(model,tex,scalefactor,vertices);
     if (planes.size() == 0)
     {
         std::cout << "Nothing to draw";

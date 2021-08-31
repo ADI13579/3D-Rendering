@@ -163,8 +163,8 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
             //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
             for (int x = int((X[0] + 0.5)); x <= int(X[1] + 0.5); x++)
             {
-                float W0 = fabs(((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div);
-                float W1 = fabs(((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div);
+                float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
+                float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
                 float W2 = 1.0 - W0 - W1;
 
                 float Z = W0 / v[0].z + W1 / v[1].z + W2 / v[2].z;
