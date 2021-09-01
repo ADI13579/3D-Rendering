@@ -83,10 +83,9 @@ namespace parser
             return face;
         }
 
-        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex,coordinate3f &scalefactor)
+        std::vector<plane_t> parse(std::string filename,std::vector<texture> &tex,coordinate3f &scalefactor,std::vector<coordinate3f> &vertexes)
         {
             std::vector<plane_t> planes;
-            std::vector<coordinate3f> vertexes;
             std::vector<coordinate3f> textures;
             std::vector<coordinate3f> normal;
             std::vector<material> materials;
@@ -303,9 +302,9 @@ namespace parser
 
                     p.scale(fac, ratioyx* fac, ratiozx* fac);
                     
-                    scalefactor.x = fac;
-                    scalefactor.y=ratioyx* fac;
-                    scalefactor.z=ratiozx* fac;
+                    scalefactor.x = 4*fac;
+                    scalefactor.y=ratioyx* scalefactor.x;
+                    scalefactor.z=ratiozx* scalefactor.x;
 
                     plane_t t(p, materialBind);
                     t.makeCalculations();
@@ -313,6 +312,7 @@ namespace parser
                  }
             }
             std::cout << "Triangles Recorded" << planes.size()<<std::endl;
+            std::cout << "Vertices Recorded" << vertexes.size()<<std::endl;
             return planes;
         }
 };

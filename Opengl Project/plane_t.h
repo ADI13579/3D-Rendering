@@ -73,7 +73,17 @@ public:
             //v[i]=v[i].rotation(alpha, 1, 0, 0, pivot);
             //v[i]=v[i].rotation(alpha, 0, 0, 1, pivot);
         }
+        makeCalculations();
     }
+
+    void calculateIntensities(coordinate3f pointlight,coordinate3f cameraPos)
+    {
+        diffuseIntensities(pointlight);
+        specularIntensities(pointlight, cameraPos);
+        attenuate(pointlight);
+        ambientIntensities(0.7);
+    }
+
     void attenuate(coordinate3f);
     void ambientIntensities(float Ia);
     void diffuseIntensities(coordinate3f pointlight);

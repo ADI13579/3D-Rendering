@@ -4,7 +4,9 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(0,SCREEN_HEIGHT/2,0);
+
+coordinate3f pointlight(0,SCREEN_HEIGHT,0);
+coordinate3f scalefactor;
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -24,7 +26,7 @@ float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 re
 float pitch = 0.0f;
 float lastX = SCREEN_WIDTH / 2.0;
 float lastY = SCREEN_HEIGHT / 2.0;
-float fov = 100.0f;
+float fov = 40.0f;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -36,13 +38,13 @@ bool liesOutside(plane_t plane)
     //IF THE SMALLEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     //IF THE LARGEST y OF THE THREE COORDINATES LIES OUTSIDE ->PLANE IS OUTSIDE WINDOW
     plane.sort();
-    if (plane.v[0].y > SCREEN_HEIGHT || plane.v[2].y < 0)
+    if (plane.v[0].y > SCREEN_HEIGHT-1 || plane.v[2].y < 0)
         return 1;
 
     //SIMILAR TO ABOVE
     std::vector<float> X = { plane.v[0].x,plane.v[1].x,plane.v[2].x };
     std::sort(X.begin(), X.end());
-    if (X[0] > SCREEN_WIDTH || X[2] < 0)
+    if (X[0] > SCREEN_WIDTH-1 || X[2] < 0)
     {
         return 1;
     }
@@ -69,10 +71,7 @@ void CameraView(std::vector<plane_t>& planes)
     std::vector<plane_t> selected;
     for (auto i : planes)
     {
-        i.diffuseIntensities(pointlight);
-        i.specularIntensities(pointlight,mycamera.Position);
-        i.attenuate(pointlight);
-        i.ambientIntensities(1);
+        i.calculateIntensities(pointlight,mycamera.Position);
         i = myshader.getShadedPlane(i);
         if (!liesOutside(i))
         {
@@ -85,21 +84,25 @@ void CameraView(std::vector<plane_t>& planes)
 
 int main()
 {
-    coordinate3f scalefactor;
     coordinate3f pivot;
-    coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
-
+    //coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
+    coordinate3f sky(128 / 255.0, 189 / 255.0, 229 / 255.0);
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
     std::string model = "temp";
-    //std::string model = "model";
-
-    std::vector<plane_t> planes = parser::parse(model,tex,scalefactor);
+    std::vector<coordinate3f> vertices;
+    std::vector<plane_t> planes = parser::parse(model,tex,scalefactor,vertices);
+    
+    //myshader.scale[0][0] = scalefactor.x;
+    //myshader.scale[1][1] = scalefactor.y;
+    //myshader.scale[2][2] = scalefactor.z;
+    
     if (planes.size() == 0)
     {
         std::cout << "Nothing to draw";
         return -1;
     }
+
     if (!glfwInit())
         return -1;
 
@@ -115,6 +118,7 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, keyCallback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     int screenWidth = SCREEN_WIDTH;
     int screenHeight = SCREEN_HEIGHT;
@@ -151,7 +155,6 @@ int main()
         //input 
         //keyCallback(window);
         //----------
-
         // set the projection matrix;
         float projMat[4][4] = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} }; // initialization, contains no meaning at all 
         mycamera.GetPerspectiveMatrix(radian(mycamera.Zoom), (float)screenWidth / (float)screenHeight, 0.1, 100, projMat);
@@ -166,18 +169,20 @@ int main()
         //std::cout << "x:" << mycamera.Front.x << "y:" << mycamera.Front.y << "z:" << mycamera.Front.z;
         mycamera.GetViewMatrix(viewMat);
         myshader.setMat("view", viewMat);
-        //show_matrix(viewMat);
+        show_matrix(viewMat);
         for (int i = 0; i < processed.size(); i++)
+        {
             processed[i].rotate(angle, pivot);
-
+        }
         //method 1
         //backface_elimination(processed);
         CameraView(processed);
 
-        std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
+        std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT+1, std::vector<coordinate3f>(SCREEN_WIDTH+1, sky));
 
 
-        std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT + 1, std::vector<float>(SCREEN_WIDTH + 1, INT_MIN));
+        std::vector<std::vector<float>> Zbuffer(SCREEN_HEIGHT+1, std::vector<float>(SCREEN_WIDTH+1, INT_MAX));
+
         for (auto i : processed)
             i.draw(0, Zbuffer, pixelbuffer);
 
@@ -207,7 +212,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     const GLfloat rotationSpeed = 5;
     const float lightMovement = 20;
 
+
     switch (key)
+
     {
 
     case GLFW_KEY_ESCAPE:
@@ -231,7 +238,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         mycamera.ProcessKeyboard(BACKWARD, deltaTime);
         break;
     case GLFW_KEY_R:
-        angle++;
+        angle+=10;
         break;
     case GLFW_KEY_T:
         angle--;
@@ -259,8 +266,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         break;
     }
 }
-
-
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------

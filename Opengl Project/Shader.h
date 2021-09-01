@@ -11,9 +11,6 @@ void transpose(float A[][N], float B[][N]);
 
 //Camera mycamera(coordinate3f(10,5,8)); // later on ; this is to be made external object 
 
-
-
-
 //void show_matrix(float mat[4][4]) {
 //	// show matrix
 //
@@ -27,17 +24,14 @@ void transpose(float A[][N], float B[][N]);
 //			
 //}
 
-
-
-class Shader {
-	
+class Shader {	
 	float modelMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float viewMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float projectionMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float modelView[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float normalModelView[4][4];
-	float scale[4][4] =  {{1.5*SCREEN_WIDTH,0,0,0},{0,1.5*SCREEN_HEIGHT,0,0},{0,0,1,0},{0,0,0,1}} ; // inorder to map to viewPort 
 public:
+	float scale[4][4] = { {1.5 * SCREEN_WIDTH,0,0,0},{0,1.5 * SCREEN_WIDTH,0,0},{0,0,1000,0},{0,0,0,1} }; // inorder to map to viewPort 
 	Shader() {
 
 
@@ -85,10 +79,6 @@ public:
 	void setMat(std::string name, float Mat[4][4]) {
 		if (name == "model") {
 			memcpy(modelMat, Mat, 4 * 4 * sizeof(float));
-
-
-
-			
 		}
 		else if (name == "view") {
 			memcpy(viewMat, Mat, 4 * 4 * sizeof(float));
@@ -107,8 +97,6 @@ public:
 		else if (name == "projection") {
 			memcpy(projectionMat, Mat, 4 * 4 * sizeof(float));
 		}
-
-
 	}
 
 
@@ -120,9 +108,6 @@ public:
 		// define and initialize point vec;
 		float vec[4][1];
 		
-
-
-
 		vec[0][0] = vertex.x;
 		vec[1][0] = vertex.y;
 		vec[2][0] = vertex.z;
@@ -143,12 +128,7 @@ public:
 		//		float resView[4][1];
 		//		//show_matrix(viewMat);
 		//	matMulVec(viewMat, resModel, resView);
-
-			
-			
-
-
-			float modelViewVector[4][1];
+		float modelViewVector[4][1];
 			matMulVec(modelView, vec, modelViewVector);
 
 		// multiply with projection matrix 
