@@ -118,7 +118,7 @@ float plane_t::GetIntersectPoint(coordinate3f a, coordinate3f b, int y)
 //RASTERIZING PART
 void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std::vector<std::vector<coordinate3f>>& pixelbuffer)
 {
-    if (WIREFRAME)
+    if(WIREFRAME)
     {
         Bresenham_Line(v[0], v[1], coordinate3f(0, 1, 1), pixelbuffer);
         Bresenham_Line(v[0], v[2], coordinate3f(0, 1, 1), pixelbuffer);
@@ -136,21 +136,19 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
         {
             if (y < 0)
                 y = 0;
-            else if (y > SCREEN_HEIGHT)
+            else if (y > SCREEN_HEIGHT-1)
                 break;
 
-
             std::vector<float> point = {
-                         GetIntersectPoint(v[0], v[1], y),
-                         GetIntersectPoint(v[1], v[2], y),
-                         GetIntersectPoint(v[2], v[0], y),
+                         floor(GetIntersectPoint(v[0], v[1], y)),
+                         floor(GetIntersectPoint(v[1], v[2], y)),
+                         floor(GetIntersectPoint(v[2], v[0], y)),
             };
 
             std::sort(point.begin(), point.end());
             if (point[point.size() - 1] == INT_MAX)
                 point.pop_back();
-
-            if (point.size() > 2)
+            else if (point.size() > 2)
             {
                 point[1] = point[2];
                 point.pop_back();
@@ -158,10 +156,9 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
 
             int X[] = { point[0],point[1] };
             X[0] = X[0] < 0 ? 0 : X[0];//CLIPPING IF THE LEFT OF X LIES OUTSIDE WINDOW
-            X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];//CLIPPING IF RIGHT OF X LIES OUTSIDE WINDOW
-
-            //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
-            for (float x = X[0]; x <= X[1]; x++)
+            X[1] = X[1] > SCREEN_WIDTH-1 ? SCREEN_WIDTH-1 : X[1];//CLIPPING IF RIGHT OF X LIES OUTSIDE WINDOW
+            
+            for (int x = X[0]; x <= X[1]; x++)
             {
                 float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
                 float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;
@@ -170,9 +167,10 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
                 float Z = W0 / v[0].z + W1 / v[1].z + W2 / v[2].z;
                 float z = 1 / Z;
 
-                if (Zbuffer[y][x] <= Z)
+                //if previous z is far away then draw the current picel (x,y)
+                if (Zbuffer[y][x] > z)
                 {
-                    Zbuffer[y][x] = Z;
+                    Zbuffer[y][x] = z;
                     coordinate3f color(I[0] * W0 + I[1] * W1 + I[2] * W2);
                     coordinate2f point(x, y);
 

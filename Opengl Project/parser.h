@@ -302,9 +302,9 @@ namespace parser
 
                     p.scale(fac, ratioyx* fac, ratiozx* fac);
                     
-                    scalefactor.x = fac;
-                    scalefactor.y=ratioyx* fac;
-                    scalefactor.z=ratiozx* fac;
+                    scalefactor.x = 4*fac;
+                    scalefactor.y=ratioyx* scalefactor.x;
+                    scalefactor.z=ratiozx* scalefactor.x;
 
                     plane_t t(p, materialBind);
                     t.makeCalculations();
