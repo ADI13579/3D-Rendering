@@ -132,7 +132,7 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
         if (div == 0)//THIS MEANS THE TRIANGLE AREA IS 0
             return;
 
-        for (int y = int(v[0].y + 0.5); y <= int(v[2].y + 0.5); y++)
+        for (int y = v[0].y; y <= v[2].y; y++)
         {
             if (y < 0)
                 y = 0;
@@ -161,7 +161,7 @@ void plane_t::draw(bool WIREFRAME, std::vector<std::vector<float>>& Zbuffer, std
             X[1] = X[1] > SCREEN_WIDTH ? SCREEN_WIDTH : X[1];//CLIPPING IF RIGHT OF X LIES OUTSIDE WINDOW
 
             //to avoid divide by 0 error in prespective correction translate everything by +(0,0,1)
-            for (int x = int((X[0] + 0.5)); x <= int(X[1] + 0.5); x++)
+            for (float x = X[0]; x <= X[1]; x++)
             {
                 float W0 = ((v[1].y - v[2].y) * (x - v[2].x) + (v[2].x - v[1].x) * (y - v[2].y)) / div;
                 float W1 = ((v[2].y - v[0].y) * (x - v[2].x) + (v[0].x - v[2].x) * (y - v[2].y)) / div;

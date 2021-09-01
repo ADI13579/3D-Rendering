@@ -36,7 +36,7 @@ class Shader {
 	float projectionMat[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float modelView[4][4];// = { {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1} };
 	float normalModelView[4][4];
-	float scale[4][4] =  {{1.5*SCREEN_WIDTH,0,0,0},{0,1.5*SCREEN_HEIGHT,0,0},{0,0,1,0},{0,0,0,1}} ; // inorder to map to viewPort 
+	float scale[4][4] =  {{1.5*SCREEN_WIDTH,0,0,0},{0,1.5*SCREEN_HEIGHT,0,0},{0,0,1000,0},{0,0,0,1}} ; // inorder to map to viewPort 
 public:
 	Shader() {
 

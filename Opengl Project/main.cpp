@@ -87,7 +87,8 @@ int main()
 {
     coordinate3f scalefactor;
     coordinate3f pivot;
-    coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
+    //coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
+    coordinate3f sky(128 / 255.0, 189 / 255.0, 229 / 255.0);
     std::vector<coordinate3f> vertices;
 
     GLFWwindow* window; //handle for the main drawable window 
@@ -171,7 +172,7 @@ int main()
             processed[i].rotate(angle, pivot);
 
         //method 1
-        //backface_elimination(processed);
+        backface_elimination(processed);
         CameraView(processed);
 
         std::vector<std::vector<coordinate3f>> pixelbuffer(SCREEN_HEIGHT + 1, std::vector<coordinate3f>(SCREEN_WIDTH + 1, sky));
@@ -241,13 +242,6 @@ void keyCallback(GLFWwindow* window)
     {
         angle--;
     }
-
-
-
-
-
-
-
     switch (4)
     {
 
@@ -273,7 +267,7 @@ void keyCallback(GLFWwindow* window)
         mycamera.ProcessKeyboard(BACKWARD, deltaTime);
         break;
     case GLFW_KEY_R:
-        angle++;
+        angle+=10;
         break;
     case GLFW_KEY_T:
         angle--;

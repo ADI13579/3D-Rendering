@@ -73,6 +73,7 @@ public:
             //v[i]=v[i].rotation(alpha, 1, 0, 0, pivot);
             //v[i]=v[i].rotation(alpha, 0, 0, 1, pivot);
         }
+        makeCalculations();
     }
     void attenuate(coordinate3f);
     void ambientIntensities(float Ia);
