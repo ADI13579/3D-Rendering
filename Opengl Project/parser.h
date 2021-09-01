@@ -301,7 +301,7 @@ namespace parser
                     float fac = SCREEN_WIDTH;
 
                     p.scale(fac, ratioyx* fac, ratiozx* fac);
-                    
+                    p.translate(coordinate3f(0, 0, -500));
                     scalefactor.x = 4*fac;
                     scalefactor.y=ratioyx* scalefactor.x;
                     scalefactor.z=ratiozx* scalefactor.x;

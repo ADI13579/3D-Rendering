@@ -4,7 +4,7 @@
 #include"Shader.h"
 #include<stb/stb.h>
 float angle;
-coordinate3f pointlight(0,SCREEN_HEIGHT,0);
+coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
 coordinate3f scalefactor;
 
 //-z is inside the screen +z is outside screen
