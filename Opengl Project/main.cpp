@@ -6,6 +6,7 @@
 float angle;
 coordinate3f pointlight(SCREEN_WIDTH,SCREEN_HEIGHT,0);
 coordinate3f scalefactor;
+bool night=0;
 
 //-z is inside the screen +z is outside screen
 void merge(std::vector<plane_t>& left, std::vector<plane_t>& right, std::vector<plane_t>& bars);
@@ -70,7 +71,7 @@ void CameraView(std::vector<plane_t>& planes)
     std::vector<plane_t> selected;
     for (auto i : planes)
     {
-        i.calculateIntensities(pointlight,mycamera.Position);
+        i.calculateIntensities(pointlight,mycamera.Position,night);
         i = myshader.getShadedPlane(i);
         if (!liesOutside(i))
         {
@@ -84,8 +85,6 @@ void CameraView(std::vector<plane_t>& planes)
 int main()
 {
     coordinate3f pivot;
-    //coordinate3f sky(36 / 255.0, 34 / 255.0, 34 / 255.0);
-    coordinate3f sky(128 / 255.0, 189 / 255.0, 229 / 255.0);
     GLFWwindow* window; //handle for the main drawable window 
     std::vector<texture> tex(200);
     std::string model = "temp";
@@ -111,8 +110,6 @@ int main()
         glfwTerminate();
         return -1;
     }
-
-    //glfwSetKeyCallback(window, keyCallback);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -141,6 +138,12 @@ int main()
     glBegin(GL_POINTS);
     while (!glfwWindowShouldClose(window))
     {
+        coordinate3f sky;
+        if(night)
+            sky=coordinate3f(35/255.0,35/255.0,35/255.0);
+        else
+            sky=coordinate3f(128 / 255.0, 189 / 255.0, 229 / 255.0);
+
         processed.clear();
         processed.resize(planes.size());
         processed = planes;
@@ -210,27 +213,18 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 {
     const GLfloat rotationSpeed = 5;
     const float lightMovement = 20;
-
-
     switch (key)
-
     {
-
     case GLFW_KEY_ESCAPE:
         glfwSetWindowShouldClose(window, true);
         break;
-
     case GLFW_KEY_A:
-        //std::cout << "deltatime" << deltaTime;
         mycamera.ProcessKeyboard(LEFT, deltaTime);
         break;
     case GLFW_KEY_D:
         mycamera.ProcessKeyboard(RIGHT, deltaTime);
         break;
-
     case GLFW_KEY_W:
-        //std::cout << "deltatime" << deltaTime;
-        //std::cout << "PositionW" << mycamera.Position.x << "," << mycamera.Position.y << "," << mycamera.Position.z;;
         mycamera.ProcessKeyboard(FORWARD, deltaTime);
         break;
     case GLFW_KEY_S:
@@ -249,7 +243,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         break;
     case GLFW_KEY_2:
         pointlight.z +=  lightMovement;
-
         break;
     case GLFW_KEY_4:
         pointlight.x -=  lightMovement;
@@ -262,6 +255,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         break;
     case GLFW_KEY_0:
         pointlight.y -=  lightMovement;
+        break;
+    case GLFW_KEY_P:
+        night=0;
+        pointlight = coordinate3f(SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+        break;
+    case GLFW_KEY_N:
+        night=1;
+        pointlight = coordinate3f(SCREEN_WIDTH/2, SCREEN_HEIGHT/2,-1000);
         break;
     }
 }

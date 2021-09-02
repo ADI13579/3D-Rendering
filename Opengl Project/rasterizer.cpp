@@ -4,7 +4,7 @@
 #include<algorithm>
 #include"Shader.h"
 
-void plane_t::diffuseIntensities(coordinate3f pointlight)
+void plane_t::diffuseIntensities(coordinate3f pointlight,float p)
 {
     /*
          H = unitvec(L + V)
@@ -19,7 +19,7 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
         float a = (!vn[i] ^ !(pointlight - v[i]));
         if (a > 0) 
         { 
-            I[i] = I[i] + kd * a;
+            I[i] = I[i] + kd * a*p;
             I[i].x = I[i].x > 1 ? 1 : I[i].x;
             I[i].y = I[i].y > 1 ? 1 : I[i].y;
             I[i].z = I[i].z > 1 ? 1 : I[i].z;
@@ -27,7 +27,7 @@ void plane_t::diffuseIntensities(coordinate3f pointlight)
     }
 }
 
-void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
+void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera,float p)
 {
     /*
          H = unitvec(L + V)
@@ -51,7 +51,7 @@ void plane_t::specularIntensities(coordinate3f pointlight,coordinate3f camera)
         float a = V ^ R;
         if (a >= 0) 
         {
-            I[i] = I[i] + ks * (pow(a, Ns));
+            I[i] = I[i] + ks * (pow(a, Ns))*p;
             I[i].x = I[i].x > 1 ? 1 : I[i].x;
             I[i].y = I[i].y > 1 ? 1 : I[i].y;
             I[i].z = I[i].z > 1 ? 1 : I[i].z;

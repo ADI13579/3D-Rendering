@@ -70,24 +70,26 @@ public:
         for (int i=0;i<3;i++)
         {
             v[i]=v[i].rotation(alpha, 0, 1, 0, pivot);
-            //v[i]=v[i].rotation(alpha, 1, 0, 0, pivot);
-            //v[i]=v[i].rotation(alpha, 0, 0, 1, pivot);
         }
         makeCalculations();
     }
 
-    void calculateIntensities(coordinate3f pointlight,coordinate3f cameraPos)
+    void calculateIntensities(coordinate3f pointlight,coordinate3f cameraPos,bool night=0)
     {
-        diffuseIntensities(pointlight);
-        specularIntensities(pointlight, cameraPos);
+        float intensity = 1;
+        if (night)
+            intensity = 0.5;
+
+        diffuseIntensities(pointlight,intensity);
+        specularIntensities(pointlight, cameraPos,intensity);
         attenuate(pointlight);
         ambientIntensities(0.7);
     }
 
     void attenuate(coordinate3f);
     void ambientIntensities(float Ia);
-    void diffuseIntensities(coordinate3f pointlight);
-    void specularIntensities(coordinate3f pointlight,coordinate3f camera);
+    void diffuseIntensities(coordinate3f pointlight, float intensity=1);
+    void specularIntensities(coordinate3f pointlight,coordinate3f camera, float intensity=1);
     void print();
     void calculateCentroid()
     {
